@@ -22,7 +22,9 @@
  *
  * <Picture>: formats avif+webp, fallbackFormat 'webp' (por defecto Astro usaría
  * PNG para un .webp), widths 480/800/1086 (nunca por encima del original),
- * eager + async (paneles fuera de pantalla por el desplazamiento horizontal).
+ * eager + async (paneles fuera de pantalla por el desplazamiento horizontal) y
+ * fetchpriority="low": se descargan desde el principio, pero sin quitar ancho de
+ * banda a lo crítico del hero (CSS, fuentes, JS) en móvil.
  */
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -126,6 +128,7 @@ const sectores = [
                         widths={[480, 800, 1086]}
                         sizes="(min-width: 1024px) 480px, 80vw"
                         loading="eager"
+                        fetchpriority="low"
                         decoding="async"
                         class="sector__img"
                         data-sector-img
@@ -335,6 +338,7 @@ const sectores = [
     left: 21%;
     bottom: 9%;
     font-family: var(--font-serif);
+    font-style: italic; /* la web solo carga la cursiva de Instrument Serif */
     font-size: 54cqi;
     line-height: 0.8;
     letter-spacing: -0.02em;

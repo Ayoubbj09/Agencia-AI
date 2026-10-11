@@ -8,13 +8,14 @@
 @import './tokens.css';
 
 /* ── Fuentes autoalojadas (Fontsource) ────────────────────────────────────
-   Inter Tight variable (100–900, solo normal) y Instrument Serif 400.
+   Inter Tight variable (100–900, solo normal) e Instrument Serif 400 cursiva.
    Cada subset lleva unicode-range: el navegador solo descarga los que usa
    (para español basta "latin"). El woff2 latin de Inter Tight se precarga
    en Base.astro. */
 @import '@fontsource-variable/inter-tight/wght.css';
 @import '@fontsource/instrument-serif/400-italic.css';
-@import '@fontsource/instrument-serif/400.css';
+/* Solo la cursiva: es la única voz de la serif en la web (acentos editoriales,
+   "IA" del logotipo). Sin la redonda nos ahorramos ~21 KB por página. */
 
 /* Fuentes de reserva con métricas ajustadas para minimizar el salto (CLS)
    mientras carga la fuente real. */
