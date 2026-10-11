@@ -1,0 +1,57 @@
+---
+/**
+ * 7.2 Narración (#narracion) — PROPIETARIO: Sección A. Script: src/scripts/sections/narrative.ts
+ *
+ * Escena ilustrativa (sin datos ni porcentajes). Cada frase se ilumina palabra a
+ * palabra con el scroll (opacity 0.2 → 1; no se anima color). Para lectores de
+ * pantalla: SplitText con aria 'hidden' + copia en .sr-only (lo añade el script
+ * o el propio marcado al implementarlo).
+ */
+const frases = [
+  { text: 'Son las 23:47. Alguien pregunta por un piso.' },
+  { text: 'Nadie contesta.' },
+  { text: 'Mañana ya habrá escrito a otra inmobiliaria.' },
+];
+---
+
+<section id="narracion" class="narrative section" aria-labelledby="narracion-title">
+  <h2 id="narracion-title" class="sr-only">Lo que pasa cuando nadie contesta</h2>
+
+  <div class="narrative__inner container">
+    {
+      frases.map((f, i) => (
+        <p class:list={['statement', 'narrative__line', `narrative__line--${i + 1}`]} data-reveal>
+          {f.text}
+        </p>
+      ))
+    }
+    <p class="statement narrative__line narrative__line--final" data-reveal>
+      Con Relevo IA, tu negocio contesta. <em>A cualquier hora.</em>
+    </p>
+  </div>
+</section>
+
+<style>
+  .narrative__inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+  .narrative__line {
+    max-width: 16em;
+  }
+  .narrative__line--2 {
+    justify-self: end;
+    text-align: right;
+  }
+  .narrative__line--final {
+    max-width: 14em;
+  }
+  .narrative__line--final em {
+    color: var(--accent);
+  }
+  @media (min-width: 64em) {
+    .narrative__line--3 {
+      margin-inline-start: 18%;
+    }
+  }
+</style>

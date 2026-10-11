@@ -1,0 +1,103 @@
+---
+/**
+ * Botón de WhatsApp compartido (Nav, Hero, panel final de Sectores y Contacto).
+ *
+ * - Naranja --accent con texto e icono en --bg (AA). Nunca verde WhatsApp.
+ * - Abre wa.me en una pestaña nueva (rel="noopener noreferrer"). Es el único
+ *   enlace externo de la web y solo se abre al hacer clic.
+ * - Magnético por defecto (core/magnetic.ts, solo escritorio) y con etiqueta de
+ *   cursor "Escribir" (core/cursor.ts).
+ * - Cualquier atributo extra (id, data-*, aria-*) se pasa al <a>.
+ *   OJO: no pongas data-reveal en el propio botón si es magnético (los dos
+ *   animan transform). Envuélvelo: <div data-reveal><WhatsAppButton /></div>.
+ *
+ * Ejemplos:
+ *   <WhatsAppButton />                                    → "Escríbenos por WhatsApp"
+ *   <WhatsAppButton label="Escríbenos" size="sm" />
+ *   <WhatsAppButton size="lg" showNumber />               → con "+34 613 657 130" visible
+ *   <WhatsAppButton iconOnly label="Escríbenos por WhatsApp" />
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { site } from '../config/site';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'href' | 'target' | 'rel'> {
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'ghost';
+  /** Muestra el número de WhatsApp de site.ts junto a la etiqueta. */
+  showNumber?: boolean;
+  /** Solo icono (la etiqueta queda como texto accesible). */
+  iconOnly?: boolean;
+  /** Texto del cursor personalizado; false para no mostrar etiqueta. */
+  cursor?: string | false;
+  /** true (fuerza 0.35), un número 0–1 con la intensidad, o false. */
+  magnetic?: boolean | number;
+}
+
+const {
+  label = 'Escríbenos por WhatsApp',
+  size = 'md',
+  variant = 'primary',
+  showNumber = false,
+  iconOnly = false,
+  cursor = 'Escribir',
+  magnetic = true,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const magneticValue = magnetic === false ? undefined : magnetic === true ? '0.35' : String(magnetic);
+---
+
+<a
+  class:list={[
+    'btn',
+    `btn--${variant}`,
+    size !== 'md' && `btn--${size}`,
+    iconOnly && 'btn--icon',
+    'wa-btn',
+    showNumber && 'wa-btn--number',
+    className,
+  ]}
+  href={site.whatsappUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  data-cursor={cursor || undefined}
+  data-magnetic={magneticValue}
+  {...rest}
+>
+  <span class="btn__inner" data-magnetic-inner>
+    <WhatsAppIcon />
+    {
+      iconOnly ? (
+        <span class="sr-only">{label}</span>
+      ) : (
+        <span class="wa-btn__text">
+          <span class="wa-btn__label">{label}</span>
+          {showNumber && <span class="wa-btn__number">{site.whatsapp}</span>}
+        </span>
+      )
+    }
+    <span class="sr-only"> (se abre WhatsApp en una pestaña nueva)</span>
+  </span>
+</a>
+
+<style>
+  .wa-btn__text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2em;
+  }
+  .wa-btn--number {
+    padding-block: 0.6em;
+  }
+  .wa-btn__number {
+    font-size: 0.62em;
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.78;
+  }
+</style>

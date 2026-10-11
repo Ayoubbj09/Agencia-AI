@@ -1,0 +1,30 @@
+---
+/**
+ * /aviso-legal (LSSI-CE, art. 10) — PROPIETARIO: Sección D (borrador completo, spec §8).
+ * Esqueleto: datos del titular desde site.ts, pendientes resaltados.
+ */
+import Base from '../layouts/Base.astro';
+import '../styles/legal.css';
+import SiteValue from '../components/SiteValue.astro';
+import { site } from '../config/site';
+---
+
+<Base title="Aviso legal" path="/aviso-legal" description="Aviso legal de Relevo IA: datos del titular y condiciones de uso del sitio web.">
+  <article class="legal container container--narrow">
+    <p class="legal__draft"><mark class="pending">Borrador pendiente de revisión</mark></p>
+    <h1 class="legal__title">Aviso legal</h1>
+    <p class="legal__updated">Última actualización: {site.legalActualizado}</p>
+
+    <p>
+      “Relevo IA” es el nombre comercial con el que <SiteValue value={site.nombreLegal} /> presta sus servicios.
+    </p>
+    <ul>
+      <li>Titular: <SiteValue value={site.nombreLegal} /></li>
+      <li>NIF: <SiteValue value={site.nif} /></li>
+      <li>Domicilio: <SiteValue value={site.direccion} /></li>
+      <li>Correo: <SiteValue value={site.correo} kind="email" /></li>
+    </ul>
+    {/* Sección D: resto del borrador (spec §8). */}
+  </article>
+</Base>
+

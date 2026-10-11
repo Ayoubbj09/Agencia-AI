@@ -1,0 +1,24 @@
+---
+/**
+ * Página de inicio. Solo compone: cada sección vive en src/components/sections/
+ * y su animación en src/scripts/sections/ (ver CONTRACT.md).
+ */
+import Base from '../layouts/Base.astro';
+import Hero from '../components/sections/Hero.astro';
+import Narrative from '../components/sections/Narrative.astro';
+import AgentDemo from '../components/sections/AgentDemo.astro';
+import HumanControl from '../components/sections/HumanControl.astro';
+import Sectors from '../components/sections/Sectors.astro';
+import Process from '../components/sections/Process.astro';
+import Contact from '../components/sections/Contact.astro';
+---
+
+<Base isHome path="/">
+  <Hero />
+  <Narrative />
+  <AgentDemo />
+  <HumanControl />
+  <Sectors />
+  <Process />
+  <Contact />
+</Base>

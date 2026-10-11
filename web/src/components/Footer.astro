@@ -1,0 +1,164 @@
+---
+/**
+ * Pie (spec §7.8). Script de animación: src/scripts/sections/footer.ts (Sección D).
+ * La marca gigante final ([data-footer-wordmark]) es decorativa (aria-hidden):
+ * el logotipo accesible ya está arriba.
+ */
+import { site, currentYear } from '../config/site';
+import Logo from './Logo.astro';
+import SiteValue from './SiteValue.astro';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+---
+
+<footer class="footer" id="pie" data-footer>
+  <div class="footer__top container">
+    <div class="footer__brand">
+      <a class="footer__logo" href="/" aria-label="Relevo IA, ir al inicio">
+        <Logo size="1.75rem" decorative />
+      </a>
+      <p class="footer__claim">
+        Agentes de IA para negocios.<br />
+        Empezamos por las inmobiliarias.
+      </p>
+    </div>
+
+    <div class="footer__cols">
+      <div class="footer__col">
+        <h2 class="footer__heading">Contacto</h2>
+        <ul role="list">
+          <li>
+            <a
+              class="link footer__wa"
+              href={site.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="Escribir"
+            >
+              <WhatsAppIcon size="1em" />
+              <span>WhatsApp <span class="nowrap">{site.whatsapp}</span></span>
+              <span class="sr-only"> (se abre WhatsApp en una pestaña nueva)</span>
+            </a>
+          </li>
+          <li><SiteValue value={site.correo} kind="email" /></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h2 class="footer__heading">Legal</h2>
+        <ul role="list">
+          <li><a class="link" href="/aviso-legal">Aviso legal</a></li>
+          <li><a class="link" href="/privacidad">Política de privacidad</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__bottom container">
+    <p class="footer__copy">
+      © <span data-current-year>{currentYear}</span> Relevo IA · <SiteValue value={site.nombreLegal} />
+    </p>
+    <p class="footer__note">Sin cookies ni rastreadores.</p>
+  </div>
+
+  <div class="footer__wordmark container" data-footer-wordmark aria-hidden="true">
+    <span class="footer__wordmark-inner">
+      Relevo<span class="footer__wordmark-dot"></span><em>IA</em>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-2xl);
+    overflow: clip;
+  }
+  .footer__top {
+    display: grid;
+    gap: var(--space-xl);
+  }
+  @media (min-width: 48em) {
+    .footer__top {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: start;
+    }
+  }
+  .footer__logo {
+    display: inline-block;
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+  }
+  .footer__claim {
+    margin-top: var(--space-m);
+    font-size: var(--fs-lg);
+    line-height: 1.4;
+    color: var(--text-muted);
+    max-width: 30ch;
+  }
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-l);
+  }
+  .footer__heading {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-s);
+  }
+  .footer__col ul {
+    display: grid;
+    gap: 0.6rem;
+    font-size: var(--fs-base);
+  }
+  .footer__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-l);
+    margin-top: var(--space-2xl);
+    padding-block: var(--space-m);
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  /* Marca gigante: ocupa el ancho del contenedor (≈3,5 em de texto); Sección D
+     la revela al llegar al final. */
+  .footer__wordmark {
+    padding-block: var(--space-l) var(--space-m);
+    user-select: none;
+  }
+  .footer__wordmark-inner {
+    display: block;
+    font-size: min(calc((100vw - 2 * var(--gutter)) / 3.55), 26rem);
+    font-weight: 600;
+    letter-spacing: -0.06em;
+    line-height: 0.82;
+    padding-bottom: 0.06em; /* descendente de la "I" cursiva */
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .footer__wordmark-dot {
+    display: inline-block;
+    inline-size: 0.16em;
+    block-size: 0.16em;
+    margin-inline: 0.02em 0.1em;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translateY(-0.16em);
+  }
+  .footer__wordmark em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+</style>

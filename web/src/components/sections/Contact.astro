@@ -1,0 +1,134 @@
+---
+/**
+ * 7.7 Contacto (#contacto) — PROPIETARIO: Sección D. Script: src/scripts/sections/contact.ts
+ *
+ * Sin formulario por ahora (ver comentario al final del marcado).
+ */
+import { site } from '../../config/site';
+import WhatsAppButton from '../WhatsAppButton.astro';
+import PrivacyNote from '../PrivacyNote.astro';
+import SiteValue from '../SiteValue.astro';
+---
+
+<section id="contacto" class="contact section" aria-labelledby="contacto-title">
+  <div class="contact__inner container">
+    <p class="eyebrow" data-reveal><span class="eyebrow__index">04</span> Contacto</p>
+
+    <h2 id="contacto-title" class="mega contact__title" data-reveal="split">
+      Pásanos el <em>relevo</em>.
+    </h2>
+
+    <div class="contact__body">
+      <p class="contact__text" data-reveal>
+        Cuéntanos cómo es tu negocio y te decimos si un agente tiene sentido para ti.
+      </p>
+
+      <div class="contact__action" data-reveal-group>
+        <div data-reveal>
+          <WhatsAppButton label="Escríbenos por WhatsApp" size="lg" showNumber magnetic={0.3} />
+        </div>
+        {
+          site.avisoAgenteIA && (
+            <p class="contact__ai" data-reveal>
+              Te responde primero nuestro agente de IA; una persona del equipo toma el relevo cuando
+              hace falta.
+            </p>
+          )
+        }
+        <div data-reveal><PrivacyNote /></div>
+      </div>
+
+      <dl class="contact__details" data-reveal>
+        <div>
+          <dt>Correo</dt>
+          <dd><SiteValue value={site.correo} kind="email" /></dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd><SiteValue value={site.telefono} kind="tel" /></dd>
+        </div>
+      </dl>
+    </div>
+
+    {
+      /*
+        FORMULARIO FUTURO (desactivado — no hay ninguna URL a propósito).
+        Iría aquí, junto al botón de WhatsApp, enviando a un webhook de n8n.
+
+        Al activarlo: añadir junto al botón de enviar la primera capa de
+        información (responsable, finalidad, enlace a /privacidad), sin casillas
+        premarcadas, y actualizar /privacidad con los campos que se recogen y el
+        proveedor del servidor de n8n.
+
+        <form class="contact__form" method="post" action="(URL del webhook de n8n)">
+          <label>Nombre <input name="nombre" autocomplete="name" required /></label>
+          <label>Teléfono <input name="telefono" type="tel" autocomplete="tel" required /></label>
+          <label>Mensaje <textarea name="mensaje" rows="4"></textarea></label>
+          <PrivacyNote />
+          <button class="btn btn--primary" type="submit">Enviar</button>
+        </form>
+      */
+    }
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding-bottom: var(--space-2xl);
+  }
+  .contact__inner {
+    display: grid;
+    gap: var(--space-l);
+  }
+  .contact__title {
+    margin-block: var(--space-s) var(--space-m);
+  }
+  .contact__title em {
+    color: var(--accent);
+  }
+  .contact__body {
+    display: grid;
+    gap: var(--space-xl);
+  }
+  @media (min-width: 64em) {
+    .contact__body {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: start;
+    }
+    .contact__details {
+      grid-column: 2;
+    }
+  }
+  .contact__text {
+    font-size: var(--fs-xl);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
+    max-width: 24ch;
+  }
+  .contact__action {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+  .contact__ai {
+    font-size: var(--fs-sm);
+    color: var(--text);
+    max-width: 48ch;
+    padding-inline-start: 1rem;
+    border-inline-start: 2px solid var(--accent);
+  }
+  .contact__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m) var(--space-xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--line);
+  }
+  .contact__details dt {
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+</style>

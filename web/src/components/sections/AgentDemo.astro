@@ -1,0 +1,264 @@
+---
+/**
+ * 7.3 Qué hace un agente (#que-hace) — PROPIETARIO: Sección B.
+ * Script: src/scripts/sections/agent.ts (pin en escritorio; por tiempo en táctil).
+ *
+ * Reglas: conversación en HTML/CSS (no imagen), etiqueta visible "Conversación
+ * de ejemplo" (también sin JS y en móvil), el agente se presenta como asistente
+ * virtual, aviso interno con etiqueta "Aviso de ejemplo". Sin logo ni interfaz
+ * de WhatsApp: burbujas del cliente en --bg-elev, del agente en --accent-deep.
+ */
+const mensajes = [
+  {
+    from: 'cliente',
+    text: 'Hola, he visto el piso de tres habitaciones que tenéis anunciado. ¿Sigue disponible?',
+  },
+  {
+    from: 'agente',
+    text: '¡Hola! Soy el asistente virtual de la inmobiliaria. Sí, sigue disponible. Para ayudarte mejor: ¿lo buscas para vivir o como inversión? ¿Y qué presupuesto manejas?',
+  },
+  { from: 'cliente', text: 'Para vivir, sobre 300.000 €. Necesitaría hipoteca.' },
+  {
+    from: 'agente',
+    text: 'Perfecto. ¿Te iría bien verlo este jueves a las 18:00 o el viernes a las 10:00?',
+  },
+  { from: 'cliente', text: 'El jueves.' },
+  {
+    from: 'agente',
+    text: 'Hecho, jueves a las 18:00. Le paso tus datos a Laura, del equipo, para lo de la financiación. Ella te escribe en breve.',
+  },
+] as const;
+
+const capacidades = [
+  {
+    title: 'Atiende al momento, a cualquier hora.',
+    text: 'Responde por WhatsApp al momento, también de noche y en fin de semana.',
+  },
+  {
+    title: 'Cualifica a cada contacto.',
+    text: 'Pregunta lo que tu equipo necesita saber (zona, presupuesto, plazos…) y separa a los curiosos de los interesados.',
+  },
+  {
+    title: 'Agenda citas.',
+    text: 'Propone huecos y deja la visita o la cita reservada.',
+  },
+  {
+    title: 'Te pasa el relevo.',
+    text: 'Cuando algo importa, avisa a una persona de tu equipo con todo el contexto. Y esa persona decide.',
+  },
+];
+---
+
+<section id="que-hace" class="agent section" aria-labelledby="que-hace-title">
+  <div class="agent__head container">
+    <p class="eyebrow" data-reveal><span class="eyebrow__index">01</span> Qué hace</p>
+    <h2 id="que-hace-title" class="agent__title" data-reveal="split">
+      Atiende, ordena y, cuando importa, <em>te pasa el relevo</em>.
+    </h2>
+  </div>
+
+  <div class="agent__stage container">
+    <figure class="agent__demo" data-agent-demo>
+      <figcaption class="agent__caption">
+        <span class="tag">Conversación de ejemplo</span>
+      </figcaption>
+
+      <div class="phone" data-agent-phone>
+        <div class="phone__header">
+          <span class="phone__avatar" aria-hidden="true">I</span>
+          <span class="phone__who">
+            <span class="phone__name">Inmobiliaria</span>
+            <span class="phone__status">Asistente virtual</span>
+          </span>
+        </div>
+        <ol class="phone__messages" role="list" data-agent-messages>
+          {
+            mensajes.map((m) => (
+              <li class:list={['msg', `msg--${m.from}`]} data-agent-msg={m.from}>
+                <span class="sr-only">{m.from === 'cliente' ? 'Cliente: ' : 'Agente: '}</span>
+                {m.text}
+              </li>
+            ))
+          }
+        </ol>
+        <p class="phone__typing" aria-hidden="true" data-agent-typing>escribiendo…</p>
+      </div>
+
+      <aside class="handoff" aria-label="Aviso interno de ejemplo al equipo" data-agent-handoff>
+        <span class="tag handoff__tag">Aviso de ejemplo</span>
+        <p class="handoff__to">Para Laura, del equipo</p>
+        <p class="handoff__text">
+          Nuevo contacto cualificado · Visita jueves 18:00 · Necesita hipoteca
+        </p>
+      </aside>
+    </figure>
+
+    <ol class="capabilities" role="list" data-agent-capabilities data-reveal-group>
+      {
+        capacidades.map((c, i) => (
+          <li class="capability" data-agent-capability={i + 1} data-reveal>
+            <span class="capability__index" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 class="capability__title">{c.title}</h3>
+            <p class="capability__text">{c.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .agent__head {
+    display: grid;
+    gap: var(--space-m);
+    margin-bottom: var(--space-2xl);
+  }
+  .agent__title {
+    max-width: 14em;
+  }
+
+  .agent__stage {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+  @media (min-width: 64em) {
+    .agent__stage {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      align-items: start;
+      gap: var(--space-xl);
+    }
+  }
+
+  /* ── Teléfono ──────────────────────────────────────────────────────────── */
+  .agent__demo {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-s);
+  }
+  .agent__caption {
+    justify-self: center;
+  }
+  .phone {
+    position: relative;
+    width: min(100%, 22rem);
+    border: 1px solid var(--line-strong);
+    border-radius: 2.75rem;
+    background: var(--bg);
+    padding: 0.75rem;
+    box-shadow: 0 0 0 6px var(--bg-elev);
+  }
+  .phone__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .phone__avatar {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: 50%;
+    background: var(--bg-elev-2);
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-sm);
+  }
+  .phone__who {
+    display: grid;
+    line-height: 1.25;
+  }
+  .phone__name {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+  }
+  .phone__status {
+    font-size: var(--fs-2xs);
+    color: var(--text-muted);
+  }
+  .phone__messages {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem 0.25rem 0.5rem;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 1.1rem;
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+  }
+  .msg--cliente {
+    justify-self: end;
+    background: var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line);
+    border-bottom-right-radius: 0.35rem;
+  }
+  .msg--agente {
+    justify-self: start;
+    background: var(--accent-deep);
+    border-bottom-left-radius: 0.35rem;
+  }
+  .phone__typing {
+    padding: 0 0.5rem 0.5rem;
+    font-size: var(--fs-2xs);
+    color: var(--text-muted);
+    visibility: hidden; /* lo muestra el script mientras "escribe" */
+  }
+
+  /* ── Aviso interno (el relevo) ─────────────────────────────────────────── */
+  .handoff {
+    display: grid;
+    gap: 0.4rem;
+    width: min(100%, 22rem);
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg-elev);
+  }
+  .handoff__tag {
+    justify-self: start;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .handoff__to {
+    font-size: var(--fs-2xs);
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+  .handoff__text {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+  }
+
+  /* ── Capacidades ───────────────────────────────────────────────────────── */
+  .capabilities {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .capability {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    column-gap: var(--space-s);
+    row-gap: 0.5rem;
+    padding-block: var(--space-l);
+    border-bottom: 1px solid var(--line);
+  }
+  .capability__index {
+    grid-row: span 2;
+    font-size: var(--fs-sm);
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.5em;
+  }
+  .capability__title {
+    font-size: var(--fs-h3);
+  }
+  .capability__text {
+    color: var(--text-muted);
+    max-width: 40ch;
+  }
+</style>

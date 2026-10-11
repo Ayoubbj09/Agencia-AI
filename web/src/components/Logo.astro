@@ -1,0 +1,77 @@
+---
+/**
+ * Logotipo tipográfico "Relevo IA".
+ *
+ *  Relevo  →  Inter Tight, peso 600, tracking cerrado.
+ *  ●       →  el "testigo": un punto naranja que toca la "o" final. Al pasar el
+ *             ratón por el enlace que lo contiene, viaja hasta "IA" (el relevo).
+ *  IA      →  Instrument Serif cursiva: siempre visible, solo cambia la voz.
+ *
+ * Accesible: role="img" + aria-label="Relevo IA" (el lector no deletrea las
+ * piezas). Con `decorative` se oculta a lectores (p. ej. la marca gigante del pie).
+ * El tamaño sale de `font-size` (prop `size` o heredado): todo va en em.
+ */
+interface Props {
+  /** Tamaño CSS (p. ej. "1.5rem", "var(--fs-mega)"). Por defecto 1.375rem. */
+  size?: string;
+  decorative?: boolean;
+  class?: string;
+}
+const { size, decorative = false, class: className } = Astro.props;
+---
+
+<span
+  class:list={['logo', className]}
+  style={size ? `--logo-size: ${size}` : undefined}
+  {...decorative ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': 'Relevo IA' }}
+>
+  <span class="logo__word" aria-hidden="true">Relevo</span><span
+    class="logo__baton"
+    aria-hidden="true"></span><span class="logo__ia" aria-hidden="true">IA</span>
+</span>
+
+<style>
+  .logo {
+    --logo-size: 1.375rem;
+    display: inline-flex;
+    align-items: baseline;
+    font-size: var(--logo-size);
+    line-height: 1;
+    color: var(--text);
+    white-space: nowrap;
+    user-select: none;
+  }
+  .logo__word {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+  }
+  /* El testigo: toca el lateral de la "o" a media altura de x. */
+  .logo__baton {
+    display: inline-block;
+    inline-size: 0.2em;
+    block-size: 0.2em;
+    margin-inline: -0.01em 0.17em;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate3d(0, -0.17em, 0);
+    transition: transform 0.7s var(--ease-expo);
+  }
+  .logo__ia {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.08em;
+    letter-spacing: 0.01em;
+  }
+  /* El relevo: el punto pasa de "Relevo" a "IA" al hacer hover/foco en el enlace. */
+  :global(a:hover) > .logo .logo__baton,
+  :global(a:focus-visible) > .logo .logo__baton {
+    transform: translate3d(0.22em, -0.17em, 0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo__baton {
+      transition: none;
+    }
+  }
+</style>

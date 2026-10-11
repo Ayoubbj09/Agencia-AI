@@ -1,0 +1,33 @@
+---
+/**
+ * Muestra un dato de site.ts. Si sigue "[PENDIENTE…]" lo resalta (spec §1: los
+ * pendientes se ven, no se ocultan). Si está relleno y es correo/teléfono, lo
+ * convierte en enlace mailto:/tel:.
+ *
+ *   <SiteValue value={site.correo} kind="email" />
+ *   <SiteValue value={site.nombreLegal} />
+ */
+import { isPending, toTelHref } from '../config/site';
+
+interface Props {
+  value: string;
+  kind?: 'text' | 'email' | 'tel';
+  class?: string;
+}
+const { value, kind = 'text', class: className } = Astro.props;
+const pending = isPending(value);
+const href =
+  pending || kind === 'text' ? undefined : kind === 'email' ? `mailto:${value}` : toTelHref(value);
+---
+
+{
+  pending ? (
+    <mark class:list={['pending', className]}>{value}</mark>
+  ) : href ? (
+    <a class:list={['link link--underlined', className]} href={href}>
+      {value}
+    </a>
+  ) : (
+    <span class={className}>{value}</span>
+  )
+}

@@ -1,0 +1,23 @@
+/* Estilo de lectura de las páginas legales (/aviso-legal, /privacidad).
+   PROPIETARIO: Sección D. Ancho cómodo (~70 caracteres), sin animaciones pesadas. */
+.legal {
+  padding-top: calc(var(--nav-h) + var(--space-2xl));
+  padding-bottom: var(--space-2xl);
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+}
+.legal__title {
+  font-size: var(--fs-h2);
+  line-height: 1;
+  margin-block: var(--space-m) var(--space-s);
+}
+.legal__updated {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-l);
+}
+.legal :is(p, ul, ol) + :is(p, ul, ol) {
+  margin-top: var(--space-s);
+}
+.legal ul {
+  padding-inline-start: 1.2em;
+}

@@ -1,0 +1,30 @@
+---
+/**
+ * 404 — PROPIETARIO: Sección D. Mismo estilo y enlace a la home. Siempre noindex.
+ */
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Página no encontrada" path="/404" noindex description="Esta página no existe.">
+  <section class="notfound container">
+    <p class="eyebrow">Error 404</p>
+    <h1 class="notfound__title">Aquí no hay <em>nadie</em>.</h1>
+    <p class="lead">La página que buscas no existe o ha cambiado de sitio.</p>
+    <a class="btn btn--primary" href="/">Volver al inicio</a>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-m);
+    min-height: 80svh;
+    align-content: center;
+    padding-top: var(--nav-h);
+  }
+  .notfound__title {
+    font-size: var(--fs-mega);
+    line-height: 0.9;
+  }
+</style>

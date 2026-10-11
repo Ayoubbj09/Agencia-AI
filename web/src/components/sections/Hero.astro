@@ -1,0 +1,202 @@
+---
+/**
+ * 7.1 Hero (#inicio) — PROPIETARIO: Sección A. Script: src/scripts/sections/hero.ts
+ *
+ * Único <h1> de la home. [data-hero-visual] es el contenedor del WebGL (OGL);
+ * mientras tanto (y en táctil / sin WebGL / reduced motion) se ve el degradado
+ * CSS de .hero__gradient: dos luces ámbar que se encuentran (el relevo).
+ */
+import WhatsAppButton from '../WhatsAppButton.astro';
+---
+
+<section id="inicio" class="hero" aria-labelledby="hero-title">
+  <div class="hero__visual" data-hero-visual aria-hidden="true">
+    <div class="hero__gradient"></div>
+  </div>
+
+  <div class="hero__content container">
+    <p class="eyebrow hero__eyebrow" data-reveal>Agentes de IA para negocios</p>
+
+    <h1 id="hero-title" class="hero__title" data-reveal="split">
+      <span class="hero__line">Tu negocio contesta por WhatsApp <em>a cualquier hora</em>.</span>
+      <span class="hero__line hero__line--soft">Y cuando importa, te avisa a ti.</span>
+    </h1>
+
+    <div class="hero__bottom" data-reveal-group>
+      <p class="hero__sub" data-reveal>
+        En Relevo IA diseñamos, montamos y mantenemos agentes de IA que atienden a tus clientes,
+        los cualifican, agendan citas y avisan a tu equipo cuando hace falta.
+      </p>
+      <div class="hero__ctas">
+        <div data-reveal>
+          <WhatsAppButton label="Escríbenos por WhatsApp" size="lg" />
+        </div>
+        <div data-reveal>
+          <a class="btn btn--ghost btn--lg hero__secondary" href="#que-hace" data-cursor-hover>
+            Ver cómo funciona
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="hero__scroll" href="#narracion" aria-label="Desliza: bajar a la siguiente sección">
+    <span class="hero__scroll-text" aria-hidden="true">Desliza</span>
+    <span class="hero__scroll-line" aria-hidden="true"></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: calc(var(--nav-h) + var(--space-xl));
+    padding-bottom: var(--space-xl);
+    isolation: isolate;
+  }
+
+  /* ── Fondo: degradado de reserva (sin WebGL / táctil / reduced) ─────────── */
+  .hero__visual {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero__gradient {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(38% 42% at 72% 38%, rgb(255 107 44 / 0.34), transparent 70%),
+      radial-gradient(30% 34% at 56% 54%, rgb(255 178 122 / 0.22), transparent 72%),
+      radial-gradient(60% 60% at 90% 10%, rgb(106 42 16 / 0.45), transparent 70%);
+  }
+  /* Spec 7.1: sin WebGL (escritorio) → movimiento muy lento (solo transform);
+     táctil y reduced motion → fondo estático. Misma condición que `desktop`. */
+  @media (min-width: 64em) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .hero__gradient {
+      animation: hero-drift 24s var(--ease-in-out) infinite alternate;
+    }
+  }
+  @keyframes hero-drift {
+    to {
+      transform: translate3d(-4%, 3%, 0) rotate(6deg);
+    }
+  }
+  /* Viñeta inferior para que el texto respire sobre el fondo. */
+  .hero__visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, var(--bg) 100%);
+  }
+
+  /* ── Contenido ─────────────────────────────────────────────────────────── */
+  .hero__content {
+    position: relative;
+    display: grid;
+    gap: var(--space-l);
+  }
+  .hero__title {
+    font-size: var(--fs-display);
+    max-width: 15.5em;
+  }
+  .hero__line {
+    display: block;
+  }
+  .hero__line--soft {
+    color: var(--text-muted);
+  }
+  .hero__title em {
+    color: var(--accent-soft);
+  }
+
+  .hero__bottom {
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-s);
+  }
+  .hero__sub {
+    font-size: var(--fs-lg);
+    line-height: 1.5;
+    color: var(--text-muted);
+    max-width: 44ch;
+  }
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+  @media (min-width: 64em) {
+    .hero__bottom {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: var(--space-xl);
+    }
+    /* Botones algo más contenidos hasta pantallas grandes: a 1280 px los .btn--lg
+       estándar dejaban el subtítulo en una columna de ~6 líneas. */
+    .hero__ctas :global(.btn--lg) {
+      --btn-h: clamp(3.5rem, 1.5rem + 3vw, 5.5rem);
+      font-size: clamp(1.125rem, 0.4rem + 1.1vw, 1.875rem);
+    }
+  }
+  @media (max-width: 29.999em) {
+    .hero__ctas > div,
+    .hero__ctas :global(.btn) {
+      width: 100%;
+    }
+  }
+
+  /* ── Indicador de scroll ───────────────────────────────────────────────── */
+  .hero__scroll {
+    position: absolute;
+    right: calc(var(--gutter) / 2 - 0.4rem); /* en el margen lateral: no pisa los CTA */
+    bottom: var(--space-l);
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    writing-mode: vertical-rl;
+  }
+  .hero__scroll-line {
+    position: relative;
+    /* medidas físicas: el padre está en writing-mode vertical */
+    width: 1px;
+    height: 3.5rem;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .hero__scroll-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateY(-100%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__scroll-line::after {
+      animation: scroll-cue 2.4s var(--ease-in-out) infinite;
+    }
+  }
+  @keyframes scroll-cue {
+    50% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+  @media (min-width: 64em) {
+    .hero__scroll {
+      display: inline-flex;
+    }
+  }
+</style>

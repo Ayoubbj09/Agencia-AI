@@ -1,0 +1,135 @@
+---
+/**
+ * 7.6 Cómo trabajamos (#como-trabajamos) — PROPIETARIO: Sección C.
+ * Script: src/scripts/sections/process.ts
+ *
+ * 4 pasos numerados. [data-process-line] es la línea que se dibuja con el
+ * scroll (scaleY/stroke-dashoffset) y cada [data-process-step] se ilumina al llegar.
+ */
+const pasos = [
+  {
+    title: 'Nos conocemos.',
+    text: 'Una reunión para entender tu negocio, tus clientes y qué te quita tiempo.',
+  },
+  {
+    title: 'Lo montamos y lo probamos.',
+    text: 'Configuramos el agente con tu información y lo probamos contigo antes de que hable con nadie.',
+  },
+  {
+    title: 'Lo ponemos en marcha.',
+    text: 'Lo conectamos a tu WhatsApp y empieza a atender.',
+  },
+  {
+    title: 'Lo cuidamos cada mes.',
+    text: 'Revisamos conversaciones, ajustamos y lo mejoramos de forma continua.',
+  },
+];
+---
+
+<section id="como-trabajamos" class="process section" aria-labelledby="como-trabajamos-title">
+  <div class="process__inner container">
+    <header class="process__head">
+      <p class="eyebrow" data-reveal><span class="eyebrow__index">03</span> Cómo trabajamos</p>
+      <h2 id="como-trabajamos-title" class="process__title" data-reveal="split">
+        Así <em>trabajamos</em>.
+      </h2>
+    </header>
+
+    <div class="process__steps">
+      <span class="process__rail" aria-hidden="true"><span class="process__line" data-process-line></span></span>
+      <ol class="process__list" role="list">
+        {
+          pasos.map((p, i) => (
+            <li class="step" data-process-step={i + 1} data-reveal>
+              <span class="step__num" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div class="step__body">
+                <h3 class="step__title">
+                  <span class="sr-only">Paso {i + 1}: </span>
+                  {p.title}
+                </h3>
+                <p class="step__text">{p.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .process__inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+  @media (min-width: 64em) {
+    .process__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: start;
+    }
+    .process__head {
+      position: sticky;
+      top: calc(var(--nav-h) + var(--space-l));
+    }
+  }
+  .process__head {
+    display: grid;
+    gap: var(--space-m);
+  }
+  .process__title {
+    max-width: 9em;
+  }
+
+  .process__steps {
+    position: relative;
+    padding-inline-start: clamp(1.5rem, 1rem + 2vw, 3rem);
+  }
+  .process__rail {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .process__line {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform-origin: top center;
+  }
+  .process__list {
+    display: grid;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-m);
+    padding-block: var(--space-l);
+    border-bottom: 1px solid var(--line);
+  }
+  .step:first-child {
+    padding-top: 0;
+  }
+  .step__num {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.9;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.1ch;
+  }
+  .step__body {
+    display: grid;
+    gap: 0.6rem;
+    padding-top: 0.4em;
+  }
+  .step__title {
+    font-size: var(--fs-h3);
+  }
+  .step__text {
+    color: var(--text-muted);
+    max-width: 44ch;
+  }
+</style>

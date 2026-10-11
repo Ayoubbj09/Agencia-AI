@@ -1,0 +1,104 @@
+---
+/**
+ * 7.4 Control humano (#control-humano) — PROPIETARIO: Sección B.
+ * Script: src/scripts/sections/human.ts
+ *
+ * Visual: una línea naranja viaja del icono "agente" al icono "persona" con el
+ * scroll ([data-human-line]: stroke-dashoffset o scaleX). Sin robots ni cerebros.
+ */
+---
+
+<section id="control-humano" class="human section" aria-labelledby="control-humano-title">
+  <div class="human__inner container">
+    <h2 id="control-humano-title" class="human__title" data-reveal="split">
+      La IA propone. <em>Tu equipo decide.</em>
+    </h2>
+
+    <p class="human__text" data-reveal>
+      El agente nunca toma decisiones importantes por su cuenta. Cuando hace falta criterio, una
+      excepción o una negociación, avisa a la persona adecuada y esa persona manda.
+    </p>
+
+    <figure class="human__diagram" aria-hidden="true" data-human-diagram data-reveal="fade">
+      <div class="human__node human__node--agent">
+        <svg viewBox="0 0 48 48" class="human__icon">
+          <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+          <circle cx="24" cy="24" r="6" fill="currentColor"></circle>
+        </svg>
+        <span>Agente</span>
+      </div>
+      <div class="human__track">
+        <span class="human__line" data-human-line></span>
+      </div>
+      <div class="human__node human__node--person">
+        <svg viewBox="0 0 48 48" class="human__icon">
+          <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+          <circle cx="24" cy="19" r="5.5" fill="currentColor"></circle>
+          <path d="M13.5 35c1.6-5.2 5.6-8 10.5-8s8.9 2.8 10.5 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+        </svg>
+        <span>Tu equipo</span>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .human__inner {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: var(--space-l);
+  }
+  .human__title {
+    max-width: 12em;
+  }
+  .human__title em {
+    color: var(--accent);
+  }
+  .human__text {
+    font-size: var(--fs-lg);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+
+  .human__diagram {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-s);
+    width: min(100%, 44rem);
+    margin-top: var(--space-l);
+  }
+  .human__node {
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .human__icon {
+    inline-size: clamp(3rem, 2.4rem + 2vw, 4.5rem);
+    block-size: auto;
+  }
+  .human__node--agent .human__icon {
+    color: var(--accent);
+  }
+  .human__node--person .human__icon {
+    color: var(--text);
+  }
+  .human__track {
+    position: relative;
+    height: 2px;
+    margin-bottom: 1.6rem; /* alinea con el centro de los iconos (las etiquetas van debajo) */
+    background: var(--line);
+    overflow: hidden;
+  }
+  .human__line {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+    transform-origin: left center;
+  }
+</style>

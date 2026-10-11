@@ -1,0 +1,33 @@
+---
+/**
+ * Primera capa de información de privacidad (spec §7.7). Va debajo de cada
+ * botón de WhatsApp "de conversión" (panel final de Sectores y Contacto).
+ */
+import { site } from '../config/site';
+import SiteValue from './SiteValue.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<p class:list={['privacy-note', className]}>
+  Al escribirnos, <SiteValue value={site.nombreLegal} /> tratará tu nombre, tu teléfono y tus mensajes
+  para responder a tu consulta. Más información en la <a
+    class="link link--underlined"
+    href="/privacidad">política de privacidad</a
+  >.
+</p>
+
+<style>
+  .privacy-note {
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 48ch;
+  }
+  .privacy-note a {
+    color: var(--text);
+  }
+</style>

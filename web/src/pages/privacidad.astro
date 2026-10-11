@@ -1,0 +1,29 @@
+---
+/**
+ * /privacidad (RGPD + LOPDGDD) — PROPIETARIO: Sección D (borrador completo, spec §8).
+ */
+import Base from '../layouts/Base.astro';
+import '../styles/legal.css';
+import SiteValue from '../components/SiteValue.astro';
+import { site } from '../config/site';
+---
+
+<Base title="Política de privacidad" path="/privacidad" description="Cómo trata Relevo IA los datos de quien visita esta web y de quien nos escribe por WhatsApp, correo o teléfono.">
+  <article class="legal container container--narrow">
+    <p class="legal__draft"><mark class="pending">Borrador pendiente de revisión</mark></p>
+    <h1 class="legal__title">Política de privacidad</h1>
+    <p class="legal__updated">Última actualización: {site.legalActualizado}</p>
+
+    <p>
+      Esta política explica cómo tratamos los datos de quien visita esta web y de quien nos escribe
+      por WhatsApp, correo o teléfono.
+    </p>
+    <p>
+      Responsable del tratamiento: <SiteValue value={site.nombreLegal} /> (nombre comercial “Relevo IA”),
+      NIF <SiteValue value={site.nif} />, domicilio <SiteValue value={site.direccion} />, correo
+      <SiteValue value={site.correo} kind="email" />.
+    </p>
+    {/* Sección D: resto del borrador (spec §8, puntos 2–13). */}
+  </article>
+</Base>
+
