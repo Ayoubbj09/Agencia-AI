@@ -1,29 +1,400 @@
 ---
 /**
- * /privacidad (RGPD + LOPDGDD) — PROPIETARIO: Sección D (borrador completo, spec §8).
+ * /privacidad (RGPD + LOPDGDD) — PROPIETARIO: Sección D. Borrador (spec §8, puntos 1–13).
+ *
+ *  - Los datos del responsable salen de src/config/site.ts (<SiteValue>): mientras
+ *    pongan "[PENDIENTE…]" se ven resaltados.
+ *  - Las marcas [PENDIENTE…] y [REVISAR CON GESTORÍA…] de este texto son las de la
+ *    spec, literales, en <mark class="pending">. El aviso del build las lista.
+ *  - Sin enlaces externos (spec §2.8): la AEPD se cita como texto (www.aepd.es).
+ *  - noindex,nofollow mientras legalCompleto sea false (lo pone Base.astro).
  */
 import Base from '../layouts/Base.astro';
 import '../styles/legal.css';
 import SiteValue from '../components/SiteValue.astro';
 import { site } from '../config/site';
+
+const sections = [
+  { id: 'responsable', title: 'Responsable del tratamiento' },
+  { id: 'datos', title: 'Qué datos tratamos' },
+  { id: 'finalidades', title: 'Para qué los usamos' },
+  { id: 'base-legal', title: 'Base legal' },
+  { id: 'obligacion', title: '¿Estás obligado a darnos tus datos?' },
+  { id: 'conservacion', title: 'Cuánto tiempo los conservamos' },
+  { id: 'destinatarios', title: 'Destinatarios y proveedores tecnológicos' },
+  { id: 'transferencias', title: 'Transferencias internacionales' },
+  { id: 'inteligencia-artificial', title: 'Uso de inteligencia artificial' },
+  { id: 'derechos', title: 'Tus derechos' },
+  { id: 'reclamacion', title: 'Reclamación ante la AEPD' },
+  { id: 'cookies', title: 'Cookies' },
+  { id: 'actualizacion', title: 'Fecha de última actualización' },
+] as const;
+type SectionId = (typeof sections)[number]['id'];
+const num = (id: SectionId) => String(sections.findIndex((s) => s.id === id) + 1).padStart(2, '0');
+const titleOf = (id: SectionId) => sections.find((s) => s.id === id)!.title;
+
+/* Punto 8: país de cada proveedor. La garantía se confirma con la gestoría. */
+const transfers = [
+  { name: 'Anthropic', country: 'EE. UU.' },
+  { name: 'Supabase', country: 'EE. UU.', note: 'región de la base de datos', pending: '[PENDIENTE]' },
+  { name: 'Google', country: 'EE. UU.' },
+  { name: 'Vercel', country: 'EE. UU.' },
+  { name: 'WhatsApp (grupo Meta)', country: 'UE, con transferencias a EE. UU.' },
+  { name: 'Servidor de n8n', pending: '[PENDIENTE: país]' },
+];
 ---
 
-<Base title="Política de privacidad" path="/privacidad" description="Cómo trata Relevo IA los datos de quien visita esta web y de quien nos escribe por WhatsApp, correo o teléfono.">
-  <article class="legal container container--narrow">
-    <p class="legal__draft"><mark class="pending">Borrador pendiente de revisión</mark></p>
-    <h1 class="legal__title">Política de privacidad</h1>
-    <p class="legal__updated">Última actualización: {site.legalActualizado}</p>
+<Base
+  title="Política de privacidad"
+  path="/privacidad"
+  description="Cómo trata Relevo IA los datos de quien visita esta web y de quien nos escribe por WhatsApp, correo o teléfono."
+>
+  <article class="legal" aria-labelledby="legal-title">
+    <div class="container">
+      <header class="legal__head">
+        {
+          !site.legalCompleto && (
+            <p class="legal__draft" role="note" data-reveal="fade">
+              <mark class="pending">Borrador pendiente de revisión</mark>
+              <span>Texto provisional: revísalo con tu gestoría antes de publicar la web.</span>
+            </p>
+          )
+        }
+        <p class="eyebrow" data-reveal>Legal</p>
+        <h1 class="legal__title" id="legal-title" data-reveal>Política de privacidad</h1>
+        <p class="legal__meta" data-reveal>Última actualización: {site.legalActualizado}</p>
+      </header>
 
-    <p>
-      Esta política explica cómo tratamos los datos de quien visita esta web y de quien nos escribe
-      por WhatsApp, correo o teléfono.
-    </p>
-    <p>
-      Responsable del tratamiento: <SiteValue value={site.nombreLegal} /> (nombre comercial “Relevo IA”),
-      NIF <SiteValue value={site.nif} />, domicilio <SiteValue value={site.direccion} />, correo
-      <SiteValue value={site.correo} kind="email" />.
-    </p>
-    {/* Sección D: resto del borrador (spec §8, puntos 2–13). */}
+      <div class="legal__layout">
+        <nav class="legal__toc" aria-labelledby="legal-toc-title">
+          <p class="legal__toc-title" id="legal-toc-title">Contenido</p>
+          <ol role="list">
+            {
+              sections.map((s, i) => (
+                <li>
+                  <a href={`#${s.id}`}>
+                    <span class="legal__toc-num" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    {s.title}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+
+        <div class="legal__body">
+          <p class="legal__lead">
+            Esta política explica cómo tratamos los datos de quien visita esta web y de quien nos
+            escribe por WhatsApp, correo o teléfono.
+          </p>
+          <p>
+            Te lo contamos en español claro, conforme al Reglamento General de Protección de Datos
+            (RGPD) y a la Ley Orgánica 3/2018, de Protección de Datos Personales y garantía de los
+            derechos digitales (LOPDGDD).
+          </p>
+
+          {/* 1 */}
+          <section class="legal__section" id="responsable" aria-labelledby="responsable-h">
+            <h2 id="responsable-h">
+              <span class="legal__num" aria-hidden="true">{num('responsable')}</span>{titleOf('responsable')}
+            </h2>
+            <dl class="legal__facts">
+              <div>
+                <dt>Responsable</dt>
+                <dd>
+                  <SiteValue value={site.nombreLegal} /> (nombre comercial “{site.nombreComercial}”)
+                </dd>
+              </div>
+              <div>
+                <dt>NIF</dt>
+                <dd><SiteValue value={site.nif} /></dd>
+              </div>
+              <div>
+                <dt>Domicilio</dt>
+                <dd><SiteValue value={site.direccion} /></dd>
+              </div>
+              <div>
+                <dt>Correo electrónico</dt>
+                <dd><SiteValue value={site.correo} kind="email" /></dd>
+              </div>
+            </dl>
+          </section>
+
+          {/* 2 */}
+          <section class="legal__section" id="datos" aria-labelledby="datos-h">
+            <h2 id="datos-h">
+              <span class="legal__num" aria-hidden="true">{num('datos')}</span>{titleOf('datos')}
+            </h2>
+            <ul>
+              <li>
+                <strong>Los que nos facilitas al escribirnos:</strong> tu nombre, tu número de teléfono
+                y el contenido de los mensajes (y tu dirección de correo, si nos escribes por correo).
+              </li>
+              <li>
+                <strong>Al visitar la web:</strong> el proveedor de alojamiento (Vercel) registra de
+                forma temporal datos técnicos (dirección IP, navegador, fecha y hora) para servir la web
+                y protegerla frente a abusos. <mark class="pending"
+                  >[REVISAR CON GESTORÍA: plazo de conservación de esos registros]</mark
+                >
+              </li>
+            </ul>
+            <p>
+              No necesitamos datos especialmente protegidos (por ejemplo, de salud) para atenderte: por
+              favor, no nos los envíes.
+            </p>
+          </section>
+
+          {/* 3 */}
+          <section class="legal__section" id="finalidades" aria-labelledby="finalidades-h">
+            <h2 id="finalidades-h">
+              <span class="legal__num" aria-hidden="true">{num('finalidades')}</span>{titleOf('finalidades')}
+            </h2>
+            <ul>
+              <li>Atender y responder tus consultas y, si lo pides, prepararte una propuesta.</li>
+              <li>En el caso de los datos técnicos, el funcionamiento y la seguridad de la web.</li>
+            </ul>
+          </section>
+
+          {/* 4 */}
+          <section class="legal__section" id="base-legal" aria-labelledby="base-legal-h">
+            <h2 id="base-legal-h">
+              <span class="legal__num" aria-hidden="true">{num('base-legal')}</span>{titleOf('base-legal')}
+            </h2>
+            <p>Usamos una base legal para cada finalidad:</p>
+            <dl class="legal__facts legal__facts--pairs">
+              <div>
+                <dt>Responder a tu consulta y prepararte una propuesta si la pides</dt>
+                <dd>Medidas precontractuales a petición tuya (art. 6.1.b RGPD).</dd>
+              </div>
+              <div>
+                <dt>Responder consultas generales que no buscan contratar</dt>
+                <dd>
+                  Nuestro interés legítimo en atender a quien nos escribe (art. 6.1.f RGPD). Puedes
+                  oponerte en cualquier momento.
+                </dd>
+              </div>
+              <div>
+                <dt>Datos técnicos de navegación</dt>
+                <dd>
+                  Interés legítimo en el funcionamiento y la seguridad de la web (art. 6.1.f RGPD).
+                </dd>
+              </div>
+            </dl>
+            <p>No usaremos tus datos para enviarte publicidad sin tu consentimiento previo.</p>
+            <p><mark class="pending">[REVISAR CON GESTORÍA]</mark></p>
+          </section>
+
+          {/* 5 */}
+          <section class="legal__section" id="obligacion" aria-labelledby="obligacion-h">
+            <h2 id="obligacion-h">
+              <span class="legal__num" aria-hidden="true">{num('obligacion')}</span>{titleOf('obligacion')}
+            </h2>
+            <p>
+              No, pero los que incluyas al escribirnos son necesarios para poder responderte; si no
+              los facilitas, no podremos atender tu consulta.
+            </p>
+          </section>
+
+          {/* 6 */}
+          <section class="legal__section" id="conservacion" aria-labelledby="conservacion-h">
+            <h2 id="conservacion-h">
+              <span class="legal__num" aria-hidden="true">{num('conservacion')}</span>{titleOf('conservacion')}
+            </h2>
+            <p>
+              El tiempo necesario para atender tu consulta y, después, durante los plazos legales
+              aplicables (por ejemplo, para atender posibles reclamaciones).
+            </p>
+            <p>
+              Como regla general, si no llegamos a tener una relación comercial, borraremos tu
+              conversación y tus datos de contacto 12 meses después de nuestro último intercambio. Si
+              pasas a ser cliente, los conservaremos mientras dure la relación y, después, durante los
+              plazos que exija la ley. <mark class="pending">[REVISAR CON GESTORÍA]</mark>
+            </p>
+          </section>
+
+          {/* 7 */}
+          <section class="legal__section" id="destinatarios" aria-labelledby="destinatarios-h">
+            <h2 id="destinatarios-h">
+              <span class="legal__num" aria-hidden="true">{num('destinatarios')}</span>{titleOf('destinatarios')}
+            </h2>
+            <p>
+              Para atenderte usamos proveedores tecnológicos que actúan como <strong
+                >encargados del tratamiento</strong
+              >: tratan los datos solo por cuenta nuestra y bajo contrato.
+            </p>
+            <ul>
+              <li><strong>Supabase</strong> (base de datos).</li>
+              <li><strong>Anthropic</strong> (modelo de IA que procesa los mensajes).</li>
+              <li>
+                <strong>n8n</strong> (automatización de procesos). <mark class="pending"
+                  >[REVISAR CON GESTORÍA: n8n está autoalojado; el encargado es el proveedor del
+                  servidor o túnel que se use (p. ej. Cloudflare o el proveedor del VPS), no n8n]</mark
+                >
+              </li>
+              <li>
+                <strong>Google</strong> (Google Calendar, para agendar citas). <mark class="pending"
+                  >[REVISAR CON GESTORÍA]</mark
+                >
+              </li>
+              <li><strong>Vercel</strong> (alojamiento de esta web).</li>
+              <li>
+                <mark class="pending"
+                  >[PENDIENTE: confirmar que los mensajes que llegan al {site.whatsapp} pasan realmente
+                  por estos proveedores; quitar los que no se usen]</mark
+                >
+              </li>
+            </ul>
+            <p>
+              <strong>WhatsApp (grupo Meta)</strong> presta el canal de mensajería y, en lo relativo al
+              funcionamiento de su plataforma, trata los datos como responsable independiente según su
+              propia política de privacidad. <mark class="pending"
+                >[REVISAR CON GESTORÍA: depende de si se usa la app WhatsApp Business o la API de
+                WhatsApp Business]</mark
+              >
+            </p>
+            <p>No se ceden datos a terceros salvo obligación legal.</p>
+          </section>
+
+          {/* 8 */}
+          <section class="legal__section" id="transferencias" aria-labelledby="transferencias-h">
+            <h2 id="transferencias-h">
+              <span class="legal__num" aria-hidden="true">{num('transferencias')}</span>{titleOf('transferencias')}
+            </h2>
+            <p>
+              Algunos de estos proveedores tratan datos fuera del Espacio Económico Europeo. Para cada
+              uno, el país donde los trata:
+            </p>
+            <table class="legal__table">
+              <caption class="sr-only">País donde trata los datos cada proveedor</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Proveedor</th>
+                  <th scope="col">País</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  transfers.map((t) => (
+                    <tr>
+                      <th scope="row">{t.name}</th>
+                      <td>
+                        {[t.country, t.note].filter(Boolean).join('; ')}{' '}
+                        {t.pending && <mark class="pending">{t.pending}</mark>}
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+            <p>
+              <strong>Garantía:</strong>
+              <mark class="pending"
+                >[REVISAR CON GESTORÍA: Marco de Privacidad de Datos UE-EE. UU. o cláusulas
+                contractuales tipo]</mark
+              >
+            </p>
+            <p>
+              Puedes pedirnos una copia de estas garantías escribiendo a <SiteValue
+                value={site.correo}
+                kind="email"
+              />.
+            </p>
+          </section>
+
+          {/* 9 */}
+          <section class="legal__section" id="inteligencia-artificial" aria-labelledby="ia-h">
+            <h2 id="ia-h">
+              <span class="legal__num" aria-hidden="true">{num('inteligencia-artificial')}</span>{
+                titleOf('inteligencia-artificial')
+              }
+            </h2>
+            <p>
+              Los mensajes que nos envías por WhatsApp pueden ser respondidos en primer lugar por un
+              asistente de IA; una persona del equipo revisa y toma el relevo cuando hace falta. Si
+              prefieres que te atienda una persona, pídelo en la conversación.
+            </p>
+            <p>
+              No tomamos decisiones basadas únicamente en un tratamiento automatizado que produzcan
+              efectos jurídicos sobre ti o te afecten de forma significativa (art. 22 RGPD).
+            </p>
+            <p>
+              <mark class="pending">[PENDIENTE: confirmar si nuestro WhatsApp lo atiende el agente]</mark>
+              <mark class="pending">[REVISAR CON GESTORÍA]</mark>
+            </p>
+          </section>
+
+          {/* 10 */}
+          <section class="legal__section" id="derechos" aria-labelledby="derechos-h">
+            <h2 id="derechos-h">
+              <span class="legal__num" aria-hidden="true">{num('derechos')}</span>{titleOf('derechos')}
+            </h2>
+            <p>Puedes ejercer en cualquier momento tus derechos de:</p>
+            <ul>
+              <li><strong>Acceso</strong> a tus datos.</li>
+              <li><strong>Rectificación</strong> de los datos inexactos.</li>
+              <li><strong>Supresión</strong> de tus datos.</li>
+              <li>
+                <strong>Oposición</strong>, en especial frente al tratamiento basado en interés
+                legítimo (art. 21 RGPD).
+              </li>
+              <li><strong>Limitación</strong> del tratamiento.</li>
+              <li><strong>Portabilidad</strong> de tus datos.</li>
+            </ul>
+            <p>
+              Si en algún caso te pedimos consentimiento, puedes retirarlo cuando quieras, sin que
+              afecte a lo tratado antes.
+            </p>
+            <p>
+              <strong>Cómo ejercerlos:</strong> escribiendo a <SiteValue
+                value={site.correo}
+                kind="email"
+              /> e indicando el derecho que ejerces. Te responderemos en el plazo de un mes (ampliable
+              en los casos que prevé el RGPD). Si tenemos dudas razonables sobre tu identidad, podremos
+              pedirte información adicional para confirmarla.
+            </p>
+          </section>
+
+          {/* 11 */}
+          <section class="legal__section" id="reclamacion" aria-labelledby="reclamacion-h">
+            <h2 id="reclamacion-h">
+              <span class="legal__num" aria-hidden="true">{num('reclamacion')}</span>{titleOf('reclamacion')}
+            </h2>
+            <p>
+              Si consideras que tus derechos no se han respetado, puedes presentar una reclamación ante
+              la Agencia Española de Protección de Datos (AEPD), en www.aepd.es.
+            </p>
+          </section>
+
+          {/* 12 */}
+          <section class="legal__section" id="cookies" aria-labelledby="cookies-h">
+            <h2 id="cookies-h">
+              <span class="legal__num" aria-hidden="true">{num('cookies')}</span>{titleOf('cookies')}
+            </h2>
+            <p class="legal__callout">
+              Esta web no instala cookies ni guarda información en tu navegador, y no usa analítica,
+              publicidad ni rastreadores (las fuentes y todos los archivos se sirven desde el propio
+              dominio).
+            </p>
+            <p>
+              Si en el futuro se añaden cookies no necesarias, se actualizará esta política y se pedirá
+              tu consentimiento antes de activarlas.
+            </p>
+          </section>
+
+          {/* 13 */}
+          <section class="legal__section" id="actualizacion" aria-labelledby="actualizacion-h">
+            <h2 id="actualizacion-h">
+              <span class="legal__num" aria-hidden="true">{num('actualizacion')}</span>{titleOf('actualizacion')}
+            </h2>
+            <p>
+              Esta política se actualizó por última vez el {site.legalActualizado}. Si la cambiamos,
+              publicaremos aquí la nueva versión con su fecha.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
   </article>
 </Base>
-

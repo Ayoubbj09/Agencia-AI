@@ -3,8 +3,17 @@
  * 7.6 Cómo trabajamos (#como-trabajamos) — PROPIETARIO: Sección C.
  * Script: src/scripts/sections/process.ts
  *
- * 4 pasos numerados. [data-process-line] es la línea que se dibuja con el
- * scroll (scaleY/stroke-dashoffset) y cada [data-process-step] se ilumina al llegar.
+ * 4 pasos grandes numerados (01–04). A la izquierda corre una línea vertical
+ * que se DIBUJA con el scroll (scaleY, scrub, ease 'none'); cada paso se
+ * ilumina (número en naranja, nodo encendido, texto a plena opacidad) cuando la
+ * línea llega a su nodo.
+ *
+ * La línea son tramos: cada paso (menos el último) lleva el tramo que va desde
+ * su nodo hasta el nodo del siguiente (mismo desplazamiento vertical en todos),
+ * así la línea acaba exactamente en el paso 04 sin medir nada en JS.
+ *
+ * Base (sin JS / reduced motion): estado final → línea completa y todos los
+ * pasos encendidos. process.ts pone el estado "apagado" solo con animación.
  */
 const pasos = [
   {
@@ -27,6 +36,8 @@ const pasos = [
 ---
 
 <section id="como-trabajamos" class="process section" aria-labelledby="como-trabajamos-title">
+  <div class="process__glow" aria-hidden="true"></div>
+
   <div class="process__inner container">
     <header class="process__head">
       <p class="eyebrow" data-reveal><span class="eyebrow__index">03</span> Cómo trabajamos</p>
@@ -35,101 +46,198 @@ const pasos = [
       </h2>
     </header>
 
-    <div class="process__steps">
-      <span class="process__rail" aria-hidden="true"><span class="process__line" data-process-line></span></span>
-      <ol class="process__list" role="list">
-        {
-          pasos.map((p, i) => (
-            <li class="step" data-process-step={i + 1} data-reveal>
-              <span class="step__num" aria-hidden="true">
+    <ol class="process__list" role="list" data-process-list>
+      {
+        pasos.map((p, i) => (
+          <li class="step" data-process-step={i + 1}>
+            <span class="step__node" aria-hidden="true">
+              <span class="step__dot" data-step-dot></span>
+            </span>
+            {i < pasos.length - 1 && (
+              <span class="step__seg" aria-hidden="true" data-process-seg>
+                <span class="step__seg-fill" data-process-line></span>
+              </span>
+            )}
+
+            <span class="step__num" aria-hidden="true">
+              <span class="step__num-ghost">{String(i + 1).padStart(2, '0')}</span>
+              <span class="step__num-lit" data-step-lit>
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <div class="step__body">
-                <h3 class="step__title">
-                  <span class="sr-only">Paso {i + 1}: </span>
-                  {p.title}
-                </h3>
-                <p class="step__text">{p.text}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
+            </span>
+
+            <div class="step__body" data-step-body>
+              <h3 class="step__title">
+                <span class="sr-only">Paso {i + 1}: </span>
+                {p.title}
+              </h3>
+              <p class="step__text">{p.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
   </div>
 </section>
 
 <style>
+  .process {
+    /* Geometría compartida por nodos y tramos de la línea. */
+    --rail-x: clamp(2.25rem, 1.2rem + 3.4vw, 5.5rem); /* sangría de la lista = posición de la línea */
+    --num-size: clamp(3.75rem, 0.8rem + 10vw, 13rem);
+    --step-pad: clamp(2rem, 1.2rem + 2.8vw, 4.5rem);
+    --node-y: calc(var(--step-pad) + var(--num-size) * 0.43); /* centro óptico de las cifras */
+    --node: 0.9rem;
+    isolation: isolate;
+  }
+
+  /* Luz ámbar muy tenue a la izquierda (estática). */
+  .process__glow {
+    position: absolute;
+    inset: 20% auto 0 0;
+    inline-size: min(60rem, 70vw);
+    z-index: var(--z-below);
+    pointer-events: none;
+    background: radial-gradient(
+      55% 45% at 0% 55%,
+      color-mix(in srgb, var(--accent) 7%, transparent),
+      transparent 75%
+    );
+  }
+
   .process__inner {
     display: grid;
-    gap: var(--space-2xl);
-  }
-  @media (min-width: 64em) {
-    .process__inner {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      align-items: start;
-    }
-    .process__head {
-      position: sticky;
-      top: calc(var(--nav-h) + var(--space-l));
-    }
+    gap: var(--space-xl);
   }
   .process__head {
     display: grid;
+    justify-items: start;
     gap: var(--space-m);
   }
   .process__title {
     max-width: 9em;
   }
+  .process__title em {
+    color: var(--accent);
+  }
 
-  .process__steps {
-    position: relative;
-    padding-inline-start: clamp(1.5rem, 1rem + 2vw, 3rem);
-  }
-  .process__rail {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 1px;
-    background: var(--line);
-  }
-  .process__line {
-    position: absolute;
-    inset: 0;
-    background: var(--accent);
-    transform-origin: top center;
-  }
+  /* ── Lista + línea ─────────────────────────────────────────────────────── */
   .process__list {
-    display: grid;
+    position: relative;
+    padding-inline-start: var(--rail-x);
   }
   .step {
+    position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-m);
-    padding-block: var(--space-l);
+    gap: var(--space-s) var(--grid-gap);
+    padding-block: var(--step-pad);
+    border-top: 1px solid var(--line);
+  }
+  .step:last-child {
     border-bottom: 1px solid var(--line);
   }
-  .step:first-child {
-    padding-top: 0;
+
+  /* Nodo sobre la línea, a la altura del centro del número. */
+  .step__node {
+    position: absolute;
+    top: var(--node-y);
+    left: calc(-1 * var(--rail-x));
+    z-index: var(--z-raised);
+    inline-size: var(--node);
+    block-size: var(--node);
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
   }
+  .step__dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow:
+      0 0 0 0.3rem var(--accent-glow),
+      0 0 1.75rem 0.25rem var(--accent-glow);
+  }
+
+  /* Tramo de línea: del nodo de este paso al del siguiente (100 % del alto del
+     paso, porque todos tienen el nodo a la misma altura). */
+  .step__seg {
+    position: absolute;
+    top: var(--node-y);
+    left: calc(-1 * var(--rail-x));
+    block-size: 100%;
+    inline-size: 1px;
+    translate: -50% 0;
+    background: var(--line-strong);
+  }
+  .step__seg-fill {
+    position: absolute;
+    inset: 0 auto 0 50%;
+    inline-size: 2px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent-soft));
+    transform-origin: 50% 0;
+  }
+
+  /* Número enorme: cifra "apagada" + capa naranja que se enciende encima. */
   .step__num {
-    font-size: var(--fs-h2);
+    position: relative;
+    display: block;
+    inline-size: max-content;
+    font-size: var(--num-size);
     font-weight: var(--fw-medium);
-    letter-spacing: var(--tracking-display);
-    line-height: 0.9;
-    color: var(--text-muted);
+    line-height: 0.85;
+    letter-spacing: -0.06em;
     font-variant-numeric: tabular-nums;
-    min-width: 2.1ch;
   }
+  /* Cifra apagada: relleno muy tenue (sin text-stroke: la fuente variable
+     dibujaría los solapes internos de los contornos, p. ej. en el "4"). */
+  .step__num-ghost {
+    display: block;
+    color: var(--line);
+  }
+  .step__num-lit {
+    position: absolute;
+    inset: 0;
+    color: var(--accent);
+    text-shadow: 0 0 0.35em var(--accent-glow);
+  }
+
   .step__body {
     display: grid;
-    gap: 0.6rem;
-    padding-top: 0.4em;
+    gap: var(--space-xs);
+    align-content: start;
   }
   .step__title {
     font-size: var(--fs-h3);
+    line-height: 1.05;
   }
   .step__text {
+    font-size: var(--fs-lg);
+    line-height: 1.5;
     color: var(--text-muted);
-    max-width: 44ch;
+    max-width: 36ch;
+  }
+
+  /* Escritorio: fila editorial [número][título][texto]. */
+  @media (min-width: 64em) {
+    .process__inner {
+      gap: var(--space-2xl);
+    }
+    .step {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 9fr);
+      align-items: start;
+    }
+    .step__body {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+      column-gap: var(--grid-gap);
+      /* Alinea la primera línea del título con la parte alta de las cifras. */
+      padding-top: calc(var(--num-size) * 0.06);
+    }
+    .step__text {
+      padding-top: 0.35em;
+    }
   }
 </style>

@@ -1,33 +1,82 @@
 /**
- * 7.8 Pie — script de la sección ([data-footer]).
- * PROPIETARIO: Sección D. Solo este archivo y su componente; no edites main.ts.
+ * 7.8 Pie — animación ([data-footer]). PROPIETARIO: Sección D.
  *
- * main.ts llama a init(ctx) UNA vez, en orden de página, y solo si existe
- * la raíz ([data-footer]). Los [data-reveal] genéricos de la sección ya los anima el núcleo
- * (core/reveal.ts) justo antes de esta llamada.
+ * Marca gigante "Relevo·IA" que se revela al llegar al final de la página:
+ *   desktop → las letras suben desde su máscara ligadas al scroll (scrub 0.8,
+ *             ease 'none') mientras la marca entra en pantalla; al tocar fondo,
+ *             el testigo naranja aparece con un acento expo.out (el "relevo").
+ *   touch   → la misma idea por tiempo al entrar (power4.out, stagger 0.08).
+ *   reduced / sin JS → la marca se ve entera desde el principio.
  *
- * Patrón: todo lo animado va dentro de ctx.mm.add(ctx.conditions, ...); el
- * contexto revierte tweens, ScrollTriggers y SplitText al cambiar de modo.
- *
- * Por hacer (spec):
- *  - Revelar la marca gigante [data-footer-wordmark] al llegar al final.
+ * Solo transform/opacity. Los [data-reveal] del pie los anima el núcleo.
  */
 import type { SectionContext } from '../core/context';
 
 export function init(ctx: SectionContext): void {
-  const { root, mm, conditions, modeOf } = ctx;
+  const { root, q, q1, gsap, mm, conditions, modeOf } = ctx;
   if (!root) return;
 
-  mm.add(conditions, (self) => {
-    const mode = modeOf(self.conditions);
-    if (mode === 'reduced') return; // maqueta estática, sin animaciones
+  const wordmark = q1('[data-footer-wordmark]');
+  const chars = q('[data-wm-ch]');
+  const dot = q1('[data-wm-dot]');
+  if (!wordmark || !chars.length) return;
 
-    if (mode === 'desktop') {
-      // TODO: versión escritorio
-    } else {
-      // TODO: versión táctil / < 1024 px
-    }
+  mm.add(
+    conditions,
+    (self) => {
+      const mode = modeOf(self.conditions);
+      if (mode === 'reduced') return; // maqueta estática, sin animaciones
 
-    // return () => { /* limpieza de listeners propios (los tweens se revierten solos) */ };
-  }, root); // scope: los selectores de texto ('.x') dentro del callback se buscan solo en root
+      if (mode === 'desktop') {
+        // Letras: de abajo (fuera de la máscara) a su sitio, a la par del scroll.
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: wordmark,
+              start: 'top bottom',
+              end: 'bottom bottom',
+              scrub: 0.8,
+            },
+          })
+          .fromTo(
+            chars,
+            { yPercent: 118 },
+            { yPercent: 0, ease: 'none', duration: 1, stagger: 0.12 },
+          );
+
+        // El testigo: acento por tiempo cuando la marca ya está casi entera.
+        if (dot) {
+          gsap.fromTo(
+            dot,
+            { scale: 0, xPercent: -260 },
+            {
+              scale: 1,
+              xPercent: 0,
+              duration: 1,
+              ease: 'expo.out',
+              scrollTrigger: {
+                trigger: wordmark,
+                start: 'bottom bottom+=40',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
+        }
+      } else {
+        // Táctil / < 1024 px: por tiempo al entrar.
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: wordmark, start: 'top 92%', once: true },
+        });
+        tl.fromTo(
+          chars,
+          { yPercent: 118 },
+          { yPercent: 0, duration: 1.1, ease: 'power4.out', stagger: 0.08 },
+        );
+        if (dot) {
+          tl.fromTo(dot, { scale: 0 }, { scale: 1, duration: 0.9, ease: 'expo.out' }, '-=0.5');
+        }
+      }
+    },
+    root,
+  );
 }

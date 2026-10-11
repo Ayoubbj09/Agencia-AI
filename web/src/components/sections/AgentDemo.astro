@@ -1,33 +1,89 @@
 ---
 /**
  * 7.3 Qué hace un agente (#que-hace) — PROPIETARIO: Sección B.
- * Script: src/scripts/sections/agent.ts (pin en escritorio; por tiempo en táctil).
+ * Script: src/scripts/sections/agent.ts
+ *
+ * Tres versiones con el MISMO marcado:
+ *  - Base (sin JS, reduced motion, hueco sin modo): todo visible en columna;
+ *    el móvil crece con la conversación entera y el aviso va debajo.
+ *  - .is-live (lo pone agent.ts en desktop y touch): aparecen los indicadores
+ *    "escribiendo" y la conversación se reproduce (por tiempo en táctil).
+ *  - .is-pinned (solo desktop): escenario fijado a pantalla completa, móvil de
+ *    alto fijo con la conversación anclada abajo y avanzando con el scroll; el
+ *    aviso interno sale de detrás del móvil y viaja hasta Laura (el relevo).
  *
  * Reglas: conversación en HTML/CSS (no imagen), etiqueta visible "Conversación
- * de ejemplo" (también sin JS y en móvil), el agente se presenta como asistente
- * virtual, aviso interno con etiqueta "Aviso de ejemplo". Sin logo ni interfaz
- * de WhatsApp: burbujas del cliente en --bg-elev, del agente en --accent-deep.
+ * de ejemplo" (visible en todas las versiones; el script no la atenúa), el
+ * agente se presenta como asistente virtual, aviso interno con "Aviso de
+ * ejemplo". Sin logo ni interfaz de WhatsApp: burbujas del cliente en
+ * --bg-elev, del agente en --accent-deep con --text (≈ 9:1).
+ *
+ * El texto de la conversación es el de la spec, literal. Dos turnos del agente
+ * se muestran en dos burbujas seguidas (como hacen los chats), sin cambiar ni
+ * una palabra: así cada capacidad se ilumina en su frase exacta.
  */
-const mensajes = [
+type From = 'cliente' | 'agente';
+interface Parte {
+  text: string;
+  /** Capacidad (1–4) que se ilumina cuando aparece esta burbuja. */
+  cap?: number;
+}
+interface Turno {
+  from: From;
+  /** Hora ilustrativa: continúa la escena de la narración (7.2, "Son las 23:47"). */
+  time: string;
+  parts: Parte[];
+}
+
+const conversacion: Turno[] = [
   {
     from: 'cliente',
-    text: 'Hola, he visto el piso de tres habitaciones que tenéis anunciado. ¿Sigue disponible?',
+    time: '23:47',
+    parts: [
+      {
+        text: 'Hola, he visto el piso de tres habitaciones que tenéis anunciado. ¿Sigue disponible?',
+      },
+    ],
   },
   {
     from: 'agente',
-    text: '¡Hola! Soy el asistente virtual de la inmobiliaria. Sí, sigue disponible. Para ayudarte mejor: ¿lo buscas para vivir o como inversión? ¿Y qué presupuesto manejas?',
+    time: '23:47',
+    parts: [
+      { text: '¡Hola! Soy el asistente virtual de la inmobiliaria. Sí, sigue disponible.', cap: 1 },
+      {
+        text: 'Para ayudarte mejor: ¿lo buscas para vivir o como inversión? ¿Y qué presupuesto manejas?',
+        cap: 2,
+      },
+    ],
   },
-  { from: 'cliente', text: 'Para vivir, sobre 300.000 €. Necesitaría hipoteca.' },
+  {
+    from: 'cliente',
+    time: '23:49',
+    parts: [{ text: 'Para vivir, sobre 300.000 €. Necesitaría hipoteca.' }],
+  },
   {
     from: 'agente',
-    text: 'Perfecto. ¿Te iría bien verlo este jueves a las 18:00 o el viernes a las 10:00?',
+    time: '23:49',
+    parts: [
+      {
+        text: 'Perfecto. ¿Te iría bien verlo este jueves a las 18:00 o el viernes a las 10:00?',
+        cap: 3,
+      },
+    ],
   },
-  { from: 'cliente', text: 'El jueves.' },
+  { from: 'cliente', time: '23:50', parts: [{ text: 'El jueves.' }] },
   {
     from: 'agente',
-    text: 'Hecho, jueves a las 18:00. Le paso tus datos a Laura, del equipo, para lo de la financiación. Ella te escribe en breve.',
+    time: '23:50',
+    parts: [
+      { text: 'Hecho, jueves a las 18:00.' },
+      {
+        text: 'Le paso tus datos a Laura, del equipo, para lo de la financiación. Ella te escribe en breve.',
+        cap: 4,
+      },
+    ],
   },
-] as const;
+];
 
 const capacidades = [
   {
@@ -49,7 +105,7 @@ const capacidades = [
 ];
 ---
 
-<section id="que-hace" class="agent section" aria-labelledby="que-hace-title">
+<section id="que-hace" class="agent section" aria-labelledby="que-hace-title" data-agent>
   <div class="agent__head container">
     <p class="eyebrow" data-reveal><span class="eyebrow__index">01</span> Qué hace</p>
     <h2 id="que-hace-title" class="agent__title" data-reveal="split">
@@ -57,59 +113,147 @@ const capacidades = [
     </h2>
   </div>
 
-  <div class="agent__stage container">
-    <figure class="agent__demo" data-agent-demo>
-      <figcaption class="agent__caption">
-        <span class="tag">Conversación de ejemplo</span>
-      </figcaption>
+  {/* Escenario: es lo que se fija (pin) en escritorio. Sin transform/filter/contain en sus ancestros. */}
+  <div class="agent__stage" data-agent-stage>
+    <div class="agent__grid container">
+      <figure class="agent__demo" data-agent-demo data-reveal>
+        <figcaption class="agent__caption">
+          <span class="tag agent__tag"><span class="agent__tag-dot" aria-hidden="true"></span>Conversación de ejemplo</span>
+        </figcaption>
 
-      <div class="phone" data-agent-phone>
-        <div class="phone__header">
-          <span class="phone__avatar" aria-hidden="true">I</span>
-          <span class="phone__who">
-            <span class="phone__name">Inmobiliaria</span>
-            <span class="phone__status">Asistente virtual</span>
-          </span>
+        <div class="agent__device" data-agent-device>
+          {/* ── Móvil (HTML/CSS) ─────────────────────────────────────────── */}
+          <div class="phone" data-agent-phone>
+            <div class="phone__screen">
+              <span class="phone__island" aria-hidden="true"></span>
+
+              <div class="phone__header">
+                <svg class="phone__back" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span class="phone__avatar" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4.5 11 12 4.75 19.5 11M6.5 9.5v9h11v-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M10.25 18.5v-4.25h3.5v4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+                <span class="phone__who">
+                  <span class="phone__name">Inmobiliaria</span>
+                  <span class="phone__status">Asistente virtual</span>
+                </span>
+              </div>
+
+              <div class="phone__chat" data-agent-chat>
+                <ol class="phone__messages" role="list" data-agent-messages>
+                  {
+                    conversacion.map((turno) => (
+                      <li class:list={['turn', `turn--${turno.from}`]}>
+                        <span class="sr-only">{turno.from === 'cliente' ? 'Cliente: ' : 'Agente: '}</span>
+                        {turno.parts.map((p, j) => (
+                          <div
+                            class:list={[
+                              'msg',
+                              { 'msg--first': j === 0, 'msg--last': j === turno.parts.length - 1 },
+                            ]}
+                            data-agent-msg={turno.from}
+                            data-cap={p.cap}
+                          >
+                            <span class="msg__typing" aria-hidden="true" data-agent-typing>
+                              <span class="msg__typing-label">escribiendo</span>
+                              <span class="msg__dots">
+                                <i />
+                                <i />
+                                <i />
+                              </span>
+                            </span>
+                            <p class="msg__bubble" data-agent-bubble>
+                              {p.text}
+                              {j === turno.parts.length - 1 && (
+                                <span class="msg__time" aria-hidden="true">
+                                  {turno.time}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        ))}
+                      </li>
+                    ))
+                  }
+                </ol>
+              </div>
+
+              <div class="phone__composer" aria-hidden="true">
+                <span class="phone__field">Escribe un mensaje</span>
+                <span class="phone__send">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+              </div>
+              <span class="phone__home" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          {/* ── El relevo: el aviso sale del móvil y llega a una persona ─── */}
+          <div class="relay" data-agent-relay>
+            <span class="relay__line" aria-hidden="true">
+              <span class="relay__fill" data-agent-relay-fill></span>
+            </span>
+
+            <aside class="handoff" aria-label="Aviso interno de ejemplo al equipo" data-agent-handoff>
+              <div class="handoff__top">
+                <span class="tag handoff__tag">Aviso de ejemplo</span>
+                <span class="handoff__when" aria-hidden="true">ahora</span>
+              </div>
+              <p class="handoff__text">
+                <strong class="handoff__title">Nuevo contacto cualificado</strong><span class="sr-only"> · </span><span class="handoff__meta">Visita jueves 18:00 · Necesita hipoteca</span>
+              </p>
+              <p class="handoff__to">Para Laura, del equipo</p>
+            </aside>
+
+            <div class="relay__person" aria-hidden="true" data-agent-person>
+              <span class="relay__avatar">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+                  <path d="M5.75 19.25c1.1-3.4 3.4-5.25 6.25-5.25s5.15 1.85 6.25 5.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                </svg>
+                <span class="relay__ring" data-agent-person-ring></span>
+              </span>
+              <span class="relay__who">
+                <span class="relay__name">Laura</span>
+                <span class="relay__role">Tu equipo</span>
+              </span>
+            </div>
+          </div>
         </div>
-        <ol class="phone__messages" role="list" data-agent-messages>
+      </figure>
+
+      <div class="agent__caps">
+        <span class="agent__rail" aria-hidden="true"><span class="agent__rail-fill" data-agent-progress></span></span>
+        <ol class="capabilities" role="list" data-agent-capabilities data-reveal-group>
           {
-            mensajes.map((m) => (
-              <li class:list={['msg', `msg--${m.from}`]} data-agent-msg={m.from}>
-                <span class="sr-only">{m.from === 'cliente' ? 'Cliente: ' : 'Agente: '}</span>
-                {m.text}
+            capacidades.map((c, i) => (
+              <li class="capability" data-agent-capability={i + 1} data-reveal>
+                <div class="capability__inner" data-agent-cap>
+                  <span class="capability__index" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="capability__title">{c.title}</h3>
+                  <p class="capability__text">{c.text}</p>
+                </div>
               </li>
             ))
           }
         </ol>
-        <p class="phone__typing" aria-hidden="true" data-agent-typing>escribiendo…</p>
       </div>
-
-      <aside class="handoff" aria-label="Aviso interno de ejemplo al equipo" data-agent-handoff>
-        <span class="tag handoff__tag">Aviso de ejemplo</span>
-        <p class="handoff__to">Para Laura, del equipo</p>
-        <p class="handoff__text">
-          Nuevo contacto cualificado · Visita jueves 18:00 · Necesita hipoteca
-        </p>
-      </aside>
-    </figure>
-
-    <ol class="capabilities" role="list" data-agent-capabilities data-reveal-group>
-      {
-        capacidades.map((c, i) => (
-          <li class="capability" data-agent-capability={i + 1} data-reveal>
-            <span class="capability__index" aria-hidden="true">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <h3 class="capability__title">{c.title}</h3>
-            <p class="capability__text">{c.text}</p>
-          </li>
-        ))
-      }
-    </ol>
+    </div>
   </div>
 </section>
 
 <style>
+  /* ==========================================================================
+     BASE (sin JS · reduced motion · hueco sin modo): todo visible, en columna.
+     ========================================================================== */
   .agent__head {
     display: grid;
     gap: var(--space-m);
@@ -119,140 +263,428 @@ const capacidades = [
     max-width: 14em;
   }
 
-  .agent__stage {
+  .agent__grid {
     display: grid;
     gap: var(--space-2xl);
   }
   @media (min-width: 64em) {
-    .agent__stage {
+    .agent__grid {
       grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-areas: 'caps demo';
       align-items: start;
-      gap: var(--space-xl);
+      column-gap: var(--space-xl);
+    }
+    .agent__caps {
+      grid-area: caps;
+      position: sticky;
+      top: calc(var(--nav-h) + var(--space-l));
+    }
+    .agent__demo {
+      grid-area: demo;
     }
   }
 
-  /* ── Teléfono ──────────────────────────────────────────────────────────── */
+  /* ── Demo: etiqueta + dispositivo ──────────────────────────────────────── */
   .agent__demo {
-    position: relative;
     display: grid;
     justify-items: center;
     gap: var(--space-s);
+    min-width: 0;
   }
-  .agent__caption {
-    justify-self: center;
+  .agent__tag {
+    gap: 0.6em;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
   }
+  .agent__tag-dot {
+    inline-size: 0.4rem;
+    block-size: 0.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+  .agent__device {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    width: 100%;
+  }
+
+  /* ── Móvil ─────────────────────────────────────────────────────────────── */
   .phone {
     position: relative;
-    width: min(100%, 22rem);
-    border: 1px solid var(--line-strong);
-    border-radius: 2.75rem;
+    z-index: 2; /* por encima del aviso, que sale de detrás */
+    display: flex;
+    width: min(100%, 21.5rem);
+    padding: 0.45rem;
+    border-radius: 3rem;
+    background: linear-gradient(155deg, var(--bg-elev-2), var(--bg) 55%, var(--bg-elev));
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      inset 0 1px 0 0 var(--line-strong),
+      0 2.5rem 7rem -2.5rem var(--accent-glow),
+      0 1.5rem 3rem -1.5rem var(--bg);
+  }
+  /* Botones laterales (decorativos) */
+  .phone::before,
+  .phone::after {
+    content: '';
+    position: absolute;
+    inline-size: 3px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+  .phone::before {
+    inset-inline-start: -3px;
+    top: 7.5rem;
+    block-size: 3.25rem;
+  }
+  .phone::after {
+    inset-inline-end: -3px;
+    top: 9rem;
+    block-size: 4.5rem;
+  }
+  .phone__screen {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    border-radius: 2.6rem;
+    overflow: hidden;
+    background:
+      radial-gradient(130% 55% at 50% 112%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+      radial-gradient(90% 40% at 50% -8%, color-mix(in srgb, var(--accent-soft) 6%, transparent), transparent 70%),
+      var(--bg);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .phone__island {
+    align-self: center;
+    inline-size: 5.25rem;
+    block-size: 1.45rem;
+    margin-top: 0.55rem;
+    border-radius: var(--radius-pill);
     background: var(--bg);
-    padding: 0.75rem;
-    box-shadow: 0 0 0 6px var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line);
+    flex: none;
   }
   .phone__header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0.75rem 1rem;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem 0.75rem 0.6rem;
     border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .phone__back {
+    inline-size: 1.35rem;
+    block-size: 1.35rem;
+    color: var(--accent);
+    flex: none;
   }
   .phone__avatar {
     display: grid;
     place-items: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
+    inline-size: 2.15rem;
+    block-size: 2.15rem;
     border-radius: 50%;
     background: var(--bg-elev-2);
-    font-weight: var(--fw-semibold);
-    font-size: var(--fs-sm);
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--accent-soft);
+    flex: none;
+  }
+  .phone__avatar svg {
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
   }
   .phone__who {
     display: grid;
-    line-height: 1.25;
+    line-height: 1.2;
+    min-width: 0;
   }
   .phone__name {
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
+    letter-spacing: -0.01em;
   }
   .phone__status {
     font-size: var(--fs-2xs);
     color: var(--text-muted);
   }
+
+  .phone__chat {
+    position: relative;
+    padding: 1rem 0.7rem 0.75rem;
+  }
   .phone__messages {
+    position: relative; /* offsetParent de las burbujas (medidas en agent.ts) */
     display: grid;
-    gap: 0.6rem;
-    padding: 1rem 0.25rem 0.5rem;
+    gap: 0.85rem;
+  }
+  .turn {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .turn--cliente {
+    justify-items: end;
+  }
+  .turn--agente {
+    justify-items: start;
   }
   .msg {
-    max-width: 85%;
-    padding: 0.65rem 0.9rem;
-    border-radius: 1.1rem;
-    font-size: var(--fs-sm);
-    line-height: 1.45;
+    position: relative;
+    max-width: 86%;
   }
-  .msg--cliente {
-    justify-self: end;
+  .msg__bubble {
+    display: flow-root; /* contiene la hora flotante */
+    padding: 0.55rem 0.8rem 0.5rem;
+    border-radius: 1.15rem;
+    font-size: var(--fs-sm);
+    line-height: 1.42;
+    letter-spacing: -0.003em;
+    text-wrap: pretty;
+  }
+  .turn--cliente .msg__bubble {
     background: var(--bg-elev);
     box-shadow: inset 0 0 0 1px var(--line);
-    border-bottom-right-radius: 0.35rem;
+    transform-origin: 100% 100%;
   }
-  .msg--agente {
-    justify-self: start;
+  .turn--agente .msg__bubble {
     background: var(--accent-deep);
-    border-bottom-left-radius: 0.35rem;
+    color: var(--text);
+    transform-origin: 0% 100%;
   }
-  .phone__typing {
-    padding: 0 0.5rem 0.5rem;
-    font-size: var(--fs-2xs);
+  /* Esquinas de grupo: la "cola" solo en la última burbuja de cada turno. */
+  .turn--cliente .msg--last .msg__bubble {
+    border-bottom-right-radius: 0.3rem;
+  }
+  .turn--agente .msg--last .msg__bubble {
+    border-bottom-left-radius: 0.3rem;
+  }
+  .turn--agente .msg:not(.msg--last) .msg__bubble {
+    border-bottom-left-radius: 0.45rem;
+  }
+  .turn--agente .msg:not(.msg--first) .msg__bubble {
+    border-top-left-radius: 0.45rem;
+  }
+  .msg__time {
+    float: right;
+    margin: 0.3rem -0.1rem -0.1rem 0.65rem;
+    font-size: 0.6875rem;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
-    visibility: hidden; /* lo muestra el script mientras "escribe" */
+  }
+  .turn--agente .msg__time {
+    color: var(--text-soft); /* --text-muted no llega a AA sobre --accent-deep */
   }
 
-  /* ── Aviso interno (el relevo) ─────────────────────────────────────────── */
-  .handoff {
-    display: grid;
-    gap: 0.4rem;
-    width: min(100%, 22rem);
-    padding: 1rem 1.1rem;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
+  /* Indicador "escribiendo": solo existe en la versión animada. */
+  .msg__typing {
+    display: none;
+  }
+  .msg__dots {
+    display: inline-flex;
+    gap: 0.2rem;
+  }
+  .msg__dots i {
+    inline-size: 0.28rem;
+    block-size: 0.28rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .phone__composer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding: 0.6rem 0.7rem 0.4rem;
+    border-top: 1px solid var(--line);
+    flex: none;
+  }
+  .phone__field {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.9rem;
+    border-radius: var(--radius-pill);
     background: var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .phone__send {
+    display: grid;
+    place-items: center;
+    inline-size: 2.1rem;
+    block-size: 2.1rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    flex: none;
+  }
+  .phone__send svg {
+    inline-size: 1.05rem;
+    block-size: 1.05rem;
+  }
+  .phone__home {
+    align-self: center;
+    inline-size: 6.5rem;
+    block-size: 0.25rem;
+    margin: 0.35rem 0 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+    flex: none;
+  }
+
+  /* ── El relevo (base: en columna bajo el móvil) ───────────────────────── */
+  .relay {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-areas: 'line' 'card' 'person';
+    justify-items: center;
+    width: min(100%, 21.5rem);
+  }
+  .relay__line {
+    grid-area: line;
+    position: relative;
+    inline-size: 1px;
+    block-size: 2.75rem;
+    background-image: linear-gradient(to bottom, var(--line-strong) 50%, transparent 0);
+    background-size: 1px 6px;
+  }
+  .relay__fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--accent-soft), var(--accent));
+    transform-origin: 50% 0%;
+  }
+
+  .handoff {
+    grid-area: card;
+    display: grid;
+    gap: 0.35rem;
+    width: 100%;
+    padding: 0.9rem 1rem 1rem;
+    border-radius: 1.25rem;
+    background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      0 1.5rem 3.5rem -1.5rem var(--accent-glow),
+      0 1rem 2rem -1rem var(--bg);
+  }
+  .handoff__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.2rem;
   }
   .handoff__tag {
-    justify-self: start;
-    border-color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
     color: var(--accent);
   }
-  .handoff__to {
+  .handoff__when {
     font-size: var(--fs-2xs);
     color: var(--text-muted);
-    margin-top: 0.25rem;
   }
   .handoff__text {
+    display: grid;
+    gap: 0.15rem;
     font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
+    line-height: 1.4;
+  }
+  .handoff__title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.015em;
+  }
+  .handoff__meta {
+    color: var(--text);
+  }
+  .handoff__to {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .relay__person {
+    grid-area: person;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: var(--space-s);
+  }
+  .relay__avatar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: 3.25rem;
+    block-size: 3.25rem;
+    border-radius: 50%;
+    background: var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    color: var(--text);
+    flex: none;
+  }
+  .relay__avatar svg {
+    inline-size: 1.6rem;
+    block-size: 1.6rem;
+  }
+  /* Anillo naranja = "le llega el relevo". Base: encendido (estado final). */
+  .relay__ring {
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    box-shadow: 0 0 1.75rem -0.25rem var(--accent-glow);
+  }
+  .relay__who {
+    display: grid;
+    line-height: 1.25;
+  }
+  .relay__name {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+  }
+  .relay__role {
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
   /* ── Capacidades ───────────────────────────────────────────────────────── */
+  .agent__caps {
+    position: relative;
+    min-width: 0;
+  }
+  .agent__rail {
+    display: none;
+  }
   .capabilities {
     display: grid;
     border-top: 1px solid var(--line);
   }
   .capability {
+    border-bottom: 1px solid var(--line);
+  }
+  .capability__inner {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1fr);
     column-gap: var(--space-s);
     row-gap: 0.5rem;
     padding-block: var(--space-l);
-    border-bottom: 1px solid var(--line);
   }
   .capability__index {
     grid-row: span 2;
     font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
     color: var(--accent);
     font-variant-numeric: tabular-nums;
-    padding-top: 0.5em;
+    padding-top: 0.55em;
   }
   .capability__title {
     font-size: var(--fs-h3);
@@ -260,5 +692,188 @@ const capacidades = [
   .capability__text {
     color: var(--text-muted);
     max-width: 40ch;
+  }
+
+  /* ==========================================================================
+     VERSIÓN ANIMADA (.is-live: desktop y táctil; la pone agent.ts)
+     ========================================================================== */
+  .agent.is-live .msg__typing {
+    position: absolute;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 1.15rem;
+    font-size: var(--fs-2xs);
+    line-height: 1.2;
+    white-space: nowrap;
+    visibility: hidden; /* GSAP (autoAlpha) lo muestra mientras "escribe" */
+    opacity: 0;
+  }
+  .agent.is-live .turn--agente .msg__typing {
+    left: 0;
+    background: var(--accent-deep);
+    color: var(--text-soft);
+    transform-origin: 0% 100%;
+  }
+  .agent.is-live .turn--cliente .msg__typing {
+    right: 0;
+    background: var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--text-muted);
+    transform-origin: 100% 100%;
+  }
+  .agent.is-live .msg__dots i {
+    animation: agent-typing-dot 1.1s var(--ease-in-out) infinite;
+  }
+  .agent.is-live .msg__dots i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .agent.is-live .msg__dots i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  @keyframes agent-typing-dot {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.45;
+    }
+    30% {
+      transform: translateY(-0.18rem);
+      opacity: 1;
+    }
+  }
+
+  /* ==========================================================================
+     ESCRITORIO FIJADO (.is-pinned: solo desktop; la pone agent.ts)
+     ========================================================================== */
+  .agent.is-pinned {
+    padding-bottom: var(--space-xl);
+  }
+  .agent.is-pinned .agent__head {
+    margin-bottom: var(--space-xl);
+  }
+  .agent.is-pinned .agent__stage {
+    display: grid;
+    align-items: center;
+    height: 100vh;
+    height: 100svh;
+    padding-top: calc(var(--nav-h) * 0.35);
+  }
+  .agent.is-pinned .agent__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    column-gap: clamp(2rem, 5vw, 6rem);
+  }
+  .agent.is-pinned .agent__caps {
+    position: relative;
+    top: auto;
+    padding-left: clamp(1.75rem, 2.5vw, 2.75rem);
+  }
+  .agent.is-pinned .agent__demo {
+    justify-items: start;
+    gap: var(--space-xs);
+  }
+
+  /* Dispositivo + relevo en fila: el aviso viaja hacia la derecha. */
+  .agent.is-pinned .agent__device {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: stretch;
+    column-gap: clamp(1.25rem, 2.5vw, 3rem);
+  }
+  .agent.is-pinned .phone {
+    width: auto;
+    min-width: 15rem; /* pantallas bajas: algo más ancho para que las burbujas respiren */
+    height: clamp(27rem, calc(100svh - 11.5rem), 46rem);
+    aspect-ratio: 0.49;
+  }
+  .agent.is-pinned .phone__chat {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0.9rem;
+  }
+  /* Las burbujas que suben se funden bajo la cabecera (velo, más barato que mask-image). */
+  .agent.is-pinned .phone__chat::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 1;
+    block-size: 2rem;
+    background: linear-gradient(to bottom, var(--bg), transparent);
+    pointer-events: none;
+  }
+  .agent.is-pinned .phone__composer {
+    margin-top: 0;
+  }
+
+  .agent.is-pinned .relay {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'card card'
+      'line person';
+    align-items: center;
+    justify-items: stretch;
+    row-gap: var(--space-s);
+    width: 100%;
+    max-width: 24rem;
+    margin-top: 6rem; /* el aviso queda a media altura del móvil */
+  }
+  .agent.is-pinned .relay__line {
+    inline-size: auto;
+    block-size: 1px;
+    margin-inline-end: 0.75rem;
+    background-image: linear-gradient(to right, var(--line-strong) 50%, transparent 0);
+    background-size: 6px 1px;
+  }
+  .agent.is-pinned .relay__fill {
+    background: linear-gradient(to right, var(--accent), var(--accent-soft));
+    transform-origin: 0% 50%;
+  }
+  .agent.is-pinned .handoff {
+    justify-self: end;
+    width: min(100%, 17.5rem);
+  }
+  .agent.is-pinned .relay__person {
+    margin-top: 0;
+  }
+
+  /* Capacidades como índice que se ilumina (la opacidad la lleva agent.ts). */
+  .agent.is-pinned .agent__rail {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    inline-size: 1px;
+    background: var(--line);
+  }
+  .agent.is-pinned .agent__rail-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--accent-soft), var(--accent));
+    transform-origin: 50% 0%;
+  }
+  .agent.is-pinned .capabilities {
+    border-top: 0;
+  }
+  .agent.is-pinned .capability {
+    border-bottom: 0;
+  }
+  .agent.is-pinned .capability__inner {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    padding-block: clamp(0.75rem, 2.4svh, 1.6rem);
+    row-gap: 0.35rem;
+  }
+  .agent.is-pinned .capability__title {
+    font-size: clamp(1.5rem, 0.6rem + 0.9vw + 1.6svh, 2.6rem);
+    line-height: 1.05;
+  }
+  .agent.is-pinned .capability__text {
+    font-size: var(--fs-base);
+    line-height: 1.45;
   }
 </style>

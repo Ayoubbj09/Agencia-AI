@@ -1,20 +1,31 @@
 ---
 /**
- * Pie (spec §7.8). Script de animación: src/scripts/sections/footer.ts (Sección D).
- * La marca gigante final ([data-footer-wordmark]) es decorativa (aria-hidden):
- * el logotipo accesible ya está arriba.
+ * Pie (spec §7.8) — PROPIETARIO: Sección D. Animación: src/scripts/sections/footer.ts
+ *
+ *  - Logotipo, frase corta, índice, WhatsApp y correo, enlaces legales.
+ *  - "© {año} Relevo IA · {nombreLegal}": el año sale del build y main.ts lo
+ *    actualiza en el navegador ([data-current-year]).
+ *  - Marca gigante final ([data-footer-wordmark]): decorativa (aria-hidden), ya
+ *    partida en letras en el marcado para revelarlas al llegar al final. Sin JS
+ *    o con reduced motion se ve entera desde el principio.
  */
-import { site, currentYear } from '../config/site';
+import { site, currentYear, navLinks, navHref } from '../config/site';
 import Logo from './Logo.astro';
 import SiteValue from './SiteValue.astro';
 import WhatsAppIcon from './WhatsAppIcon.astro';
+
+const isHome = Astro.url.pathname === '/';
+const word = Array.from('Relevo');
+const ia = Array.from('IA');
 ---
 
 <footer class="footer" id="pie" data-footer>
   <div class="footer__top container">
-    <div class="footer__brand">
-      <a class="footer__logo" href="/" aria-label="Relevo IA, ir al inicio">
-        <Logo size="1.75rem" decorative />
+    <div class="footer__brand" data-reveal>
+      {/* Mismo patrón que la nav: el nombre accesible es el del logotipo
+          ("Relevo IA", role="img"), igual al texto visible. */}
+      <a class="footer__logo" href="/" data-cursor-hover>
+        <Logo size="1.75rem" />
       </a>
       <p class="footer__claim">
         Agentes de IA para negocios.<br />
@@ -22,8 +33,23 @@ import WhatsAppIcon from './WhatsAppIcon.astro';
       </p>
     </div>
 
-    <div class="footer__cols">
-      <div class="footer__col">
+    <div class="footer__cols" data-reveal-group="0.1">
+      <nav class="footer__col" aria-labelledby="pie-indice" data-reveal>
+        <h2 class="footer__heading" id="pie-indice">Índice</h2>
+        <ul role="list">
+          {
+            navLinks.map((l) => (
+              <li>
+                <a class="link" href={navHref(l.id, isHome)}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__col" data-reveal>
         <h2 class="footer__heading">Contacto</h2>
         <ul role="list">
           <li>
@@ -42,7 +68,8 @@ import WhatsAppIcon from './WhatsAppIcon.astro';
           <li><SiteValue value={site.correo} kind="email" /></li>
         </ul>
       </div>
-      <div class="footer__col">
+
+      <div class="footer__col" data-reveal>
         <h2 class="footer__heading">Legal</h2>
         <ul role="list">
           <li><a class="link" href="/aviso-legal">Aviso legal</a></li>
@@ -57,11 +84,17 @@ import WhatsAppIcon from './WhatsAppIcon.astro';
       © <span data-current-year>{currentYear}</span> Relevo IA · <SiteValue value={site.nombreLegal} />
     </p>
     <p class="footer__note">Sin cookies ni rastreadores.</p>
+    <a class="link footer__up" href="#main">
+      Volver arriba <span class="footer__up-arrow" aria-hidden="true">↑</span>
+    </a>
   </div>
 
   <div class="footer__wordmark container" data-footer-wordmark aria-hidden="true">
     <span class="footer__wordmark-inner">
-      Relevo<span class="footer__wordmark-dot"></span><em>IA</em>
+      <span class="footer__wordmark-clip">
+        {word.map((c) => <span class="footer__wm-ch" data-wm-ch>{c}</span>)}<span
+          class="footer__wordmark-dot"><span class="footer__wordmark-baton" data-wm-dot></span></span><em class="footer__wm-ia">{ia.map((c) => <span class="footer__wm-ch" data-wm-ch>{c}</span>)}</em>
+      </span>
     </span>
   </div>
 </footer>
@@ -77,9 +110,9 @@ import WhatsAppIcon from './WhatsAppIcon.astro';
     display: grid;
     gap: var(--space-xl);
   }
-  @media (min-width: 48em) {
+  @media (min-width: 64em) {
     .footer__top {
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
       align-items: start;
     }
   }
@@ -97,65 +130,115 @@ import WhatsAppIcon from './WhatsAppIcon.astro';
   }
   .footer__cols {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--space-l) var(--space-m);
   }
   .footer__heading {
     font-size: var(--fs-2xs);
     font-weight: var(--fw-medium);
     letter-spacing: var(--tracking-caps);
+    line-height: 1.2;
     text-transform: uppercase;
     color: var(--text-muted);
     margin-bottom: var(--space-s);
   }
   .footer__col ul {
     display: grid;
-    gap: 0.6rem;
+    gap: 0.65rem;
     font-size: var(--fs-base);
+    justify-items: start;
   }
   .footer__wa {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
   }
+
   .footer__bottom {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    align-items: baseline;
     gap: var(--space-xs) var(--space-l);
-    margin-top: var(--space-2xl);
+    margin-top: var(--space-xl);
     padding-block: var(--space-m);
-    border-top: 1px solid var(--line);
     font-size: var(--fs-sm);
     color: var(--text-muted);
   }
+  /* Filete alineado con el texto (no con el borde del contenedor). */
+  .footer__bottom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--gutter);
+    right: var(--gutter);
+    height: 1px;
+    background: var(--line);
+  }
+  .footer__copy {
+    margin-right: auto;
+  }
+  .footer__up {
+    color: var(--text);
+  }
+  .footer__up-arrow {
+    display: inline-block;
+    margin-left: 0.25em;
+    transition: translate 0.6s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .footer__up:hover .footer__up-arrow {
+      translate: 0 -0.25em;
+    }
+  }
 
-  /* Marca gigante: ocupa el ancho del contenedor (≈3,5 em de texto); Sección D
-     la revela al llegar al final. */
+  /* ── Marca gigante ──────────────────────────────────────────────────────
+     Ocupa el ancho del contenedor (≈ 3,64 em de texto + el vuelo de la cursiva). Cada letra es un
+     inline-block que footer.ts sube desde debajo de la máscara. */
   .footer__wordmark {
+    container-type: inline-size; /* 100cqi = ancho útil del contenedor */
     padding-block: var(--space-l) var(--space-m);
     user-select: none;
   }
   .footer__wordmark-inner {
     display: block;
-    font-size: min(calc((100vw - 2 * var(--gutter)) / 3.55), 26rem);
+    font-size: min(calc((100vw - 2 * var(--gutter)) / 3.68), 25rem); /* reserva */
+    font-size: calc(100cqi / 3.68);
     font-weight: 600;
     letter-spacing: -0.06em;
     line-height: 0.82;
-    padding-bottom: 0.06em; /* descendente de la "I" cursiva */
     color: var(--text);
     white-space: nowrap;
   }
+  /* Máscara vertical: padding para no cortar la cursiva ni la tilde de nada,
+     compensado con margen negativo (no mueve el diseño). En horizontal no
+     recorta (la "A" cursiva sobresale un poco a la derecha). */
+  .footer__wordmark-clip {
+    display: block;
+    overflow-x: visible;
+    overflow-y: clip;
+    padding-block: 0.14em 0.08em;
+    margin-block: -0.14em -0.02em;
+  }
+  .footer__wm-ch {
+    display: inline-block;
+  }
+  /* El hueco del testigo (posición fija) y el testigo (lo anima footer.ts). */
   .footer__wordmark-dot {
     display: inline-block;
     inline-size: 0.16em;
     block-size: 0.16em;
     margin-inline: 0.02em 0.1em;
+    translate: 0 -0.16em;
+  }
+  .footer__wordmark-baton {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
     border-radius: 50%;
     background: var(--accent);
-    transform: translateY(-0.16em);
   }
-  .footer__wordmark em {
+  .footer__wm-ia {
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 400;

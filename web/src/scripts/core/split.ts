@@ -36,6 +36,25 @@ export interface SplitOptions {
   build?: (self: SplitText) => gsap.core.Animation;
 }
 
+/**
+ * Palabras/letras: `yPercent` se mide sobre la caja de cada trozo, y una palabra
+ * dentro de un <em> de titular mide ~0 de alto (global.css le da line-height 0
+ * para que la serif no abra el interlineado): no subiría nada. Se convierte a
+ * `y` en px con la altura de SU línea, así todas las palabras recorren lo mismo.
+ */
+function wordSafeFrom(from: gsap.TweenVars, animate: SplitOptions['animate']): gsap.TweenVars {
+  if (animate === 'lines' || typeof from.yPercent !== 'number') return from;
+  const { yPercent, ...rest } = from;
+  const pct = yPercent as number;
+  return {
+    ...rest,
+    y: (_: number, el: Element) => {
+      const line = el.closest<HTMLElement>('.split-line') ?? (el as HTMLElement);
+      return (line.offsetHeight * pct) / 100;
+    },
+  };
+}
+
 export function splitText(target: HTMLElement, opts: SplitOptions = {}): SplitText {
   const {
     type = 'lines,words',
@@ -63,7 +82,7 @@ export function splitText(target: HTMLElement, opts: SplitOptions = {}): SplitTe
       const pieces =
         animate === 'chars' ? self.chars : animate === 'words' ? self.words : self.lines;
       return gsap.from(pieces, {
-        ...from,
+        ...wordSafeFrom(from, animate),
         duration: 1.1,
         ease: 'power4.out',
         stagger: 0.1,

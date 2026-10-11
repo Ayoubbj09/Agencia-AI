@@ -3,12 +3,19 @@
  * 7.4 Control humano (#control-humano) — PROPIETARIO: Sección B.
  * Script: src/scripts/sections/human.ts
  *
- * Visual: una línea naranja viaja del icono "agente" al icono "persona" con el
- * scroll ([data-human-line]: stroke-dashoffset o scaleX). Sin robots ni cerebros.
+ * Sección corta y con mucho aire. Visual: el "testigo" (punto naranja) sale del
+ * agente y viaja por una línea hasta la persona, que se enciende al recibirlo.
+ * Con el scroll (scrub, ease 'none'): línea con scaleX + punto con translateX.
+ *
+ * Base (sin JS / reduced motion): estado final, línea completa y persona
+ * encendida. Iconos sencillos de trazo fino: un bocadillo (el agente conversa)
+ * y una persona. Nada de robots ni cerebros.
  */
 ---
 
 <section id="control-humano" class="human section" aria-labelledby="control-humano-title">
+  <div class="human__glow" aria-hidden="true"></div>
+
   <div class="human__inner container">
     <h2 id="control-humano-title" class="human__title" data-reveal="split">
       La IA propone. <em>Tu equipo decide.</em>
@@ -21,28 +28,70 @@
 
     <figure class="human__diagram" aria-hidden="true" data-human-diagram data-reveal="fade">
       <div class="human__node human__node--agent">
-        <svg viewBox="0 0 48 48" class="human__icon">
-          <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-          <circle cx="24" cy="24" r="6" fill="currentColor"></circle>
-        </svg>
-        <span>Agente</span>
+        <span class="human__badge">
+          <svg viewBox="0 0 24 24" class="human__icon">
+            <path
+              d="M6.25 5.75h11.5a2 2 0 0 1 2 2v6.5a2 2 0 0 1-2 2h-6.1l-4.15 3.1v-3.1h-1.25a2 2 0 0 1-2-2v-6.5a2 2 0 0 1 2-2Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linejoin="round"></path>
+            <circle cx="8.9" cy="11" r="0.95" fill="currentColor"></circle>
+            <circle cx="12" cy="11" r="0.95" fill="currentColor"></circle>
+            <circle cx="15.1" cy="11" r="0.95" fill="currentColor"></circle>
+          </svg>
+        </span>
+        <span class="human__label">
+          <span class="human__name">Agente</span>
+          <span class="human__verb">propone</span>
+        </span>
       </div>
-      <div class="human__track">
+
+      <div class="human__track" data-human-track>
         <span class="human__line" data-human-line></span>
+        <span class="human__baton" data-human-baton></span>
       </div>
-      <div class="human__node human__node--person">
-        <svg viewBox="0 0 48 48" class="human__icon">
-          <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-          <circle cx="24" cy="19" r="5.5" fill="currentColor"></circle>
-          <path d="M13.5 35c1.6-5.2 5.6-8 10.5-8s8.9 2.8 10.5 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
-        </svg>
-        <span>Tu equipo</span>
+
+      <div class="human__node human__node--person" data-human-person>
+        <span class="human__badge">
+          <svg viewBox="0 0 24 24" class="human__icon">
+            <circle cx="12" cy="9" r="3.3" fill="none" stroke="currentColor" stroke-width="1.3"></circle>
+            <path
+              d="M5.9 19.1c1.1-3.3 3.3-5.1 6.1-5.1s5 1.8 6.1 5.1"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"></path>
+          </svg>
+          <span class="human__ring" data-human-ring></span>
+        </span>
+        <span class="human__label">
+          <span class="human__name">Tu equipo</span>
+          <span class="human__verb">decide</span>
+        </span>
       </div>
     </figure>
   </div>
 </section>
 
 <style>
+  .human {
+    isolation: isolate;
+  }
+  /* Luz ámbar muy tenue bajo el diagrama (estática). */
+  .human__glow {
+    position: absolute;
+    inset: auto 0 0;
+    block-size: 70%;
+    z-index: var(--z-below);
+    pointer-events: none;
+    background: radial-gradient(
+      50% 45% at 50% 70%,
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      transparent 75%
+    );
+  }
+
   .human__inner {
     display: grid;
     justify-items: center;
@@ -50,37 +99,49 @@
     gap: var(--space-l);
   }
   .human__title {
-    max-width: 12em;
+    max-width: 11em;
+    font-size: clamp(2.5rem, 1rem + 5.6vw, 7.25rem);
+    line-height: 0.98;
+    letter-spacing: var(--tracking-display);
   }
   .human__title em {
     color: var(--accent);
   }
   .human__text {
     font-size: var(--fs-lg);
+    line-height: 1.5;
     color: var(--text-muted);
-    max-width: 46ch;
+    max-width: 44ch;
   }
 
+  /* ── Diagrama: agente ── testigo ──▶ persona ──────────────────────────── */
   .human__diagram {
+    --badge: clamp(3.75rem, 2.9rem + 3vw, 6rem);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-s);
-    width: min(100%, 44rem);
-    margin-top: var(--space-l);
+    align-items: start;
+    column-gap: clamp(0.75rem, 0.3rem + 1.6vw, 1.75rem);
+    width: min(100%, 54rem);
+    margin-top: var(--space-xl);
   }
   .human__node {
     display: grid;
     justify-items: center;
-    gap: 0.6rem;
-    font-size: var(--fs-2xs);
-    letter-spacing: var(--tracking-caps);
-    text-transform: uppercase;
-    color: var(--text-muted);
+    gap: 0.85rem;
+  }
+  .human__badge {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: var(--badge);
+    block-size: var(--badge);
+    border-radius: 50%;
+    background: var(--bg-elev);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
   }
   .human__icon {
-    inline-size: clamp(3rem, 2.4rem + 2vw, 4.5rem);
-    block-size: auto;
+    inline-size: 46%;
+    block-size: 46%;
   }
   .human__node--agent .human__icon {
     color: var(--accent);
@@ -88,17 +149,76 @@
   .human__node--person .human__icon {
     color: var(--text);
   }
+  /* Anillo de la persona: encendido en la versión estática (estado final). */
+  .human__ring {
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    box-shadow:
+      0 0 2.5rem -0.25rem var(--accent-glow),
+      inset 0 0 1.5rem -0.5rem var(--accent-glow);
+  }
+  .human__label {
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    line-height: 1.2;
+  }
+  .human__name {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .human__verb {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-lg);
+    color: var(--text-muted);
+  }
+  .human__node--person .human__verb {
+    color: var(--accent);
+  }
+
+  /* La pista: discontinua (lo que falta) + línea naranja (lo recorrido). */
   .human__track {
     position: relative;
-    height: 2px;
-    margin-bottom: 1.6rem; /* alinea con el centro de los iconos (las etiquetas van debajo) */
-    background: var(--line);
-    overflow: hidden;
+    align-self: start;
+    block-size: 2px;
+    margin-top: calc(var(--badge) / 2 - 1px);
+    background-image: linear-gradient(to right, var(--line-strong) 50%, transparent 0);
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    background-position: 0 50%;
   }
   .human__line {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, var(--accent), var(--accent-soft));
-    transform-origin: left center;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent-deep), var(--accent) 35%, var(--accent-soft));
+    transform-origin: 0% 50%;
+  }
+  /* El testigo: oculto en la versión estática (ya llegó). Lo muestra human.ts. */
+  .human__baton {
+    position: absolute;
+    left: -0.4rem;
+    top: 50%;
+    inline-size: 0.8rem;
+    block-size: 0.8rem;
+    margin-top: -0.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow:
+      0 0 0 0.3rem var(--accent-glow),
+      0 0 1.5rem 0.2rem var(--accent-glow);
+    opacity: 0;
+  }
+
+  @media (max-width: 30em) {
+    .human__name {
+      letter-spacing: 0.08em;
+    }
   }
 </style>

@@ -20,7 +20,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
 import { conditions, modeOf, noModeMatches } from './core/media';
-import { createLenis, destroyLenis, getLenis, scrollToTarget, startScroll, stopScroll } from './core/lenis';
+import {
+  ANCHOR_OFFSET,
+  createLenis,
+  destroyLenis,
+  getLenis,
+  scrollToTarget,
+  startScroll,
+  stopScroll,
+} from './core/lenis';
 import { revealElements, setupReveals, showAll } from './core/reveal';
 import { splitText } from './core/split';
 import { initCursor } from './core/cursor';
@@ -44,6 +52,42 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 const html = document.documentElement;
 const isHome = window.location.pathname === '/' || window.location.pathname === '/index.html';
 
+/* ── 1b. Mantener el sitio al cambiar de modo (escritorio ⇄ táctil en vivo) ──
+   Al cambiar de modo se revierten TODOS los ScrollTriggers (todos viven en la
+   matchMedia) y ScrollTrigger, al quedarse sin ninguno, olvida la posición que
+   había guardado: tras su refresh la página quedaba arriba del todo. Aquí se
+   apunta qué bloque había bajo la nav (y cuánto se había avanzado en él) ANTES
+   de que gsap reaccione —estas MediaQueryList se crean antes que las de mm.add,
+   así que su evento `change` llega primero— y se vuelve a él tras el refresh. */
+const NAV_OFFSET = -ANCHOR_OFFSET;
+let spot: { el: Element; ratio: number } | null = null;
+let modeChanged = false;
+const recordSpot = () => {
+  modeChanged = true;
+  if (spot || window.scrollY < 4) return;
+  const blocks = document.querySelectorAll('#main > *, [data-footer]');
+  for (const el of Array.from(blocks)) {
+    const r = el.getBoundingClientRect();
+    if (r.height > 0 && r.bottom > NAV_OFFSET) {
+      spot = { el, ratio: Math.min(1, Math.max(0, (NAV_OFFSET - r.top) / r.height)) };
+      return;
+    }
+  }
+};
+const restoreSpot = () => {
+  if (!spot) return;
+  const { el, ratio } = spot;
+  spot = null;
+  const r = el.getBoundingClientRect();
+  scrollToTarget(Math.max(0, Math.round(window.scrollY + r.top + ratio * r.height - NAV_OFFSET)), {
+    immediate: true,
+  });
+  ScrollTrigger.update();
+};
+Object.values(conditions).forEach((q) => window.matchMedia(q).addEventListener('change', recordSpot));
+// Se emite al final del refresh que sigue a un cambio de matchMedia.
+ScrollTrigger.addEventListener('matchMedia', restoreSpot);
+
 /** LA instancia de gsap.matchMedia() de toda la web. */
 const mm = gsap.matchMedia();
 
@@ -62,11 +106,18 @@ Object.values(conditions).forEach((q) => window.matchMedia(q).addEventListener('
 syncNoMode();
 
 /* ── 3. Lenis, cursor, magnéticos, nav ─────────────────────────────────── */
-mm.add(conditions, (self) => {
-  if (modeOf(self.conditions) === 'reduced') return; // spec: sin Lenis con reduced motion
-  createLenis();
-  return () => destroyLenis();
-});
+// Lenis existe en desktop y en táctil (en táctil el scroll es nativo, pero
+// mantiene las anclas con offset) y solo desaparece con reduced motion. Por eso
+// depende ÚNICAMENTE de la preferencia de movimiento: no se destruye y recrea al
+// pasar de escritorio a táctil (p. ej. al estrechar la ventana).
+mm.add(
+  { reduce: conditions.reduced, motionOk: '(prefers-reduced-motion: no-preference)' },
+  (self) => {
+    if (self.conditions?.reduce) return; // spec: sin Lenis con reduced motion
+    createLenis();
+    return () => destroyLenis();
+  },
+);
 
 mm.add(conditions, (self) => {
   if (modeOf(self.conditions) !== 'desktop') return; // cursor y magnéticos: solo escritorio
@@ -179,7 +230,7 @@ for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const) {
 
 /** Salto al #ancla de la URL con el offset de la nav (spec §9). */
 function jumpToHash(): void {
-  if (userMoved) return;
+  if (userMoved || modeChanged) return;
   const hash = decodeURIComponent(window.location.hash || '');
   if (hash.length > 1 && hash !== '#menu' && document.getElementById(hash.slice(1))) {
     scrollToTarget(hash, { immediate: true });
@@ -197,3 +248,14 @@ fontsReady
 // El navegador vuelve a hacer su propio salto al fragmento al terminar `load`
 // (sin offset y con los pins ya medidos de otra forma): se corrige otra vez.
 pageLoaded.then(() => requestAnimationFrame(jumpToHash));
+
+// Cualquier refresh posterior (el automático de ScrollTrigger en `load`, el de
+// las imágenes...) cambia el espacio de los pins: si la persona aún no se ha
+// movido, se vuelve a colocar el ancla. Al primer gesto deja de actuar.
+if (window.location.hash.length > 1) {
+  const onRefresh = () => {
+    if (userMoved || modeChanged) ScrollTrigger.removeEventListener('refresh', onRefresh);
+    else jumpToHash();
+  };
+  ScrollTrigger.addEventListener('refresh', onRefresh);
+}

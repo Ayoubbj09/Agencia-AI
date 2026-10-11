@@ -72,7 +72,10 @@
   --space-xl: clamp(3rem, 2rem + 4vw, 6rem);
   --space-2xl: clamp(4.5rem, 2.5rem + 8vw, 10rem);
   --space-3xl: clamp(6rem, 3rem + 12vw, 15rem);
-  --section-space: var(--space-3xl); /* padding vertical por defecto de una sección */
+  /* Padding vertical por defecto de una sección (80 → 200 px). Algo menos que
+     --space-3xl: entre dos secciones se suman dos paddings y con 3xl quedaban
+     ~450 px de negro entre bloques en escritorio. */
+  --section-space: clamp(5rem, 2.25rem + 9vw, 12.5rem);
 
   /* ── Layout ────────────────────────────────────────────────────────────── */
   --container-max: 100rem; /* 1600 px */

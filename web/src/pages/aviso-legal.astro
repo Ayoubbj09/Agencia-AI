@@ -1,30 +1,242 @@
 ---
 /**
- * /aviso-legal (LSSI-CE, art. 10) — PROPIETARIO: Sección D (borrador completo, spec §8).
- * Esqueleto: datos del titular desde site.ts, pendientes resaltados.
+ * /aviso-legal (LSSI-CE, art. 10) — PROPIETARIO: Sección D. Borrador (spec §8).
+ *
+ *  - Los datos del titular salen de src/config/site.ts (<SiteValue>): mientras
+ *    pongan "[PENDIENTE…]" se ven resaltados.
+ *  - Las notas para la gestoría van resaltadas en <mark class="pending"> con la marca
+ *    "REVISAR CON GESTORÍA" entre corchetes; el aviso del build
+ *    (src/integrations/pending-report.ts) las lista con su línea.
+ *  - Sin enlaces externos (spec §2.8: el único externo es wa.me).
+ *  - noindex,nofollow mientras legalCompleto sea false (lo pone Base.astro).
  */
 import Base from '../layouts/Base.astro';
 import '../styles/legal.css';
 import SiteValue from '../components/SiteValue.astro';
 import { site } from '../config/site';
+
+const sections = [
+  { id: 'titular', title: 'Titular del sitio web' },
+  { id: 'objeto', title: 'Objeto del sitio web' },
+  { id: 'condiciones', title: 'Condiciones de uso' },
+  { id: 'propiedad', title: 'Propiedad intelectual e industrial' },
+  { id: 'responsabilidad', title: 'Exclusión de responsabilidad' },
+  { id: 'enlaces', title: 'Enlaces externos' },
+  { id: 'datos', title: 'Protección de datos y cookies' },
+  { id: 'legislacion', title: 'Legislación aplicable y jurisdicción' },
+  { id: 'cambios', title: 'Cambios en este aviso legal' },
+] as const;
+type SectionId = (typeof sections)[number]['id'];
+const num = (id: SectionId) => String(sections.findIndex((s) => s.id === id) + 1).padStart(2, '0');
+const titleOf = (id: SectionId) => sections.find((s) => s.id === id)!.title;
 ---
 
-<Base title="Aviso legal" path="/aviso-legal" description="Aviso legal de Relevo IA: datos del titular y condiciones de uso del sitio web.">
-  <article class="legal container container--narrow">
-    <p class="legal__draft"><mark class="pending">Borrador pendiente de revisión</mark></p>
-    <h1 class="legal__title">Aviso legal</h1>
-    <p class="legal__updated">Última actualización: {site.legalActualizado}</p>
+<Base
+  title="Aviso legal"
+  path="/aviso-legal"
+  description="Aviso legal de Relevo IA: datos del titular y condiciones de uso del sitio web."
+>
+  <article class="legal" aria-labelledby="legal-title">
+    <div class="container">
+      <header class="legal__head">
+        {
+          !site.legalCompleto && (
+            <p class="legal__draft" role="note" data-reveal="fade">
+              <mark class="pending">Borrador pendiente de revisión</mark>
+              <span>Texto provisional: revísalo con tu gestoría antes de publicar la web.</span>
+            </p>
+          )
+        }
+        <p class="eyebrow" data-reveal>Legal</p>
+        <h1 class="legal__title" id="legal-title" data-reveal>Aviso legal</h1>
+        <p class="legal__meta" data-reveal>Última actualización: {site.legalActualizado}</p>
+      </header>
 
-    <p>
-      “Relevo IA” es el nombre comercial con el que <SiteValue value={site.nombreLegal} /> presta sus servicios.
-    </p>
-    <ul>
-      <li>Titular: <SiteValue value={site.nombreLegal} /></li>
-      <li>NIF: <SiteValue value={site.nif} /></li>
-      <li>Domicilio: <SiteValue value={site.direccion} /></li>
-      <li>Correo: <SiteValue value={site.correo} kind="email" /></li>
-    </ul>
-    {/* Sección D: resto del borrador (spec §8). */}
+      <div class="legal__layout">
+        <nav class="legal__toc" aria-labelledby="legal-toc-title">
+          <p class="legal__toc-title" id="legal-toc-title">Contenido</p>
+          <ol role="list">
+            {
+              sections.map((s, i) => (
+                <li>
+                  <a href={`#${s.id}`}>
+                    <span class="legal__toc-num" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    {s.title}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+
+        <div class="legal__body">
+          <p class="legal__lead">
+            En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de servicios de la
+            sociedad de la información y de comercio electrónico (LSSI-CE), te informamos de quién
+            está detrás de esta web y de las condiciones para usarla.
+          </p>
+
+          <section class="legal__section" id="titular" aria-labelledby="titular-h">
+            <h2 id="titular-h"><span class="legal__num" aria-hidden="true">{num('titular')}</span>{titleOf('titular')}</h2>
+            <p>
+              “Relevo IA” es el nombre comercial con el que <SiteValue value={site.nombreLegal} /> presta
+              sus servicios.
+            </p>
+            <dl class="legal__facts">
+              <div>
+                <dt>Titular</dt>
+                <dd><SiteValue value={site.nombreLegal} /></dd>
+              </div>
+              <div>
+                <dt>Nombre comercial</dt>
+                <dd>{site.nombreComercial}</dd>
+              </div>
+              <div>
+                <dt>NIF</dt>
+                <dd><SiteValue value={site.nif} /></dd>
+              </div>
+              <div>
+                <dt>Domicilio</dt>
+                <dd><SiteValue value={site.direccion} /></dd>
+              </div>
+              <div>
+                <dt>Correo electrónico</dt>
+                <dd><SiteValue value={site.correo} kind="email" /></dd>
+              </div>
+              <div>
+                <dt>WhatsApp</dt>
+                <dd><span class="nowrap">{site.whatsapp}</span></dd>
+              </div>
+              <div>
+                <dt>Datos registrales</dt>
+                <dd>Si los hubiera: <mark class="pending">[REVISAR CON GESTORÍA]</mark></dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="legal__section" id="objeto" aria-labelledby="objeto-h">
+            <h2 id="objeto-h"><span class="legal__num" aria-hidden="true">{num('objeto')}</span>{titleOf('objeto')}</h2>
+            <p>
+              Esta web presenta los servicios de Relevo IA: diseñamos, montamos y mantenemos agentes de
+              IA para negocios que atienden a sus clientes por WhatsApp, los cualifican, agendan citas
+              y avisan a una persona del equipo cuando hace falta.
+            </p>
+            <p>
+              Su finalidad es informar sobre esos servicios y facilitar que nos escribas por WhatsApp,
+              correo o teléfono. Desde la web no se contrata ni se paga nada: las condiciones de cada
+              encargo se acuerdan directamente con cada cliente.
+            </p>
+          </section>
+
+          <section class="legal__section" id="condiciones" aria-labelledby="condiciones-h">
+            <h2 id="condiciones-h">
+              <span class="legal__num" aria-hidden="true">{num('condiciones')}</span>{titleOf('condiciones')}
+            </h2>
+            <p>
+              Acceder a esta web y navegar por ella es gratuito y no requiere registro. Al usarla,
+              aceptas este aviso legal en la versión publicada en ese momento.
+            </p>
+            <p>Te comprometes a usar la web y sus contenidos de forma lícita y de buena fe. En particular, a no:</p>
+            <ul>
+              <li>utilizarla para fines o actividades ilícitos o contrarios a este aviso legal;</li>
+              <li>
+                dañar, sobrecargar o impedir el funcionamiento normal de la web o de los sistemas que
+                la sirven;
+              </li>
+              <li>intentar acceder a zonas, datos o sistemas a los que no tienes autorización.</li>
+            </ul>
+          </section>
+
+          <section class="legal__section" id="propiedad" aria-labelledby="propiedad-h">
+            <h2 id="propiedad-h">
+              <span class="legal__num" aria-hidden="true">{num('propiedad')}</span>{titleOf('propiedad')}
+            </h2>
+            <p>
+              Los textos, el diseño, el logotipo y el nombre comercial “Relevo IA”, el código y el
+              resto de elementos de esta web pertenecen a <SiteValue value={site.nombreLegal} /> o se
+              usan con autorización de sus titulares. No está permitido reproducirlos, distribuirlos,
+              comunicarlos públicamente ni transformarlos sin autorización previa por escrito, salvo
+              para uso personal y privado.
+            </p>
+            <p>
+              Las fotografías de los sectores son imágenes de ambientación generadas con IA; no
+              muestran clientes ni negocios reales. Las conversaciones de WhatsApp que aparecen en la
+              web son ejemplos ilustrativos.
+            </p>
+            <p>
+              Las tipografías Inter Tight e Instrument Serif se usan bajo la licencia SIL Open Font
+              License y se sirven desde esta misma web. WhatsApp es una marca de su titular (grupo
+              Meta); aquí solo se menciona para identificar el canal de contacto.
+            </p>
+          </section>
+
+          <section class="legal__section" id="responsabilidad" aria-labelledby="responsabilidad-h">
+            <h2 id="responsabilidad-h">
+              <span class="legal__num" aria-hidden="true">{num('responsabilidad')}</span>{titleOf('responsabilidad')}
+            </h2>
+            <p>
+              Procuramos que la información de esta web sea correcta y esté actualizada, pero puede
+              contener errores u omisiones y cambiar sin previo aviso. Los contenidos son orientativos
+              y no constituyen una oferta vinculante.
+            </p>
+            <p>
+              En la medida en que lo permita la ley, <SiteValue value={site.nombreLegal} /> no se hace
+              responsable de los daños que pudieran derivarse del uso de la información de la web, ni
+              de interrupciones, errores técnicos o fallos de acceso ajenos a su control.
+            </p>
+          </section>
+
+          <section class="legal__section" id="enlaces" aria-labelledby="enlaces-h">
+            <h2 id="enlaces-h"><span class="legal__num" aria-hidden="true">{num('enlaces')}</span>{titleOf('enlaces')}</h2>
+            <p>
+              La web incluye enlaces a WhatsApp (wa.me) que solo se abren cuando haces clic en ellos.
+              Al abrirlos sales de esta web y pasan a aplicarse las condiciones y la política de
+              privacidad de WhatsApp. No controlamos los contenidos de sitios de terceros ni
+              respondemos de ellos.
+            </p>
+          </section>
+
+          <section class="legal__section" id="datos" aria-labelledby="datos-h">
+            <h2 id="datos-h"><span class="legal__num" aria-hidden="true">{num('datos')}</span>{titleOf('datos')}</h2>
+            <p>
+              Cómo tratamos los datos de quien visita la web o nos escribe se explica en la <a
+                class="link link--underlined"
+                href="/privacidad">política de privacidad</a
+              >.
+            </p>
+            <p class="legal__callout">
+              Esta web no instala cookies ni guarda información en tu navegador, y no usa analítica,
+              publicidad ni rastreadores.
+            </p>
+          </section>
+
+          <section class="legal__section" id="legislacion" aria-labelledby="legislacion-h">
+            <h2 id="legislacion-h">
+              <span class="legal__num" aria-hidden="true">{num('legislacion')}</span>{titleOf('legislacion')}
+            </h2>
+            <p>
+              Este aviso legal se rige por la legislación española. Si eres consumidor, para cualquier
+              controversia serán competentes los juzgados y tribunales de tu domicilio, conforme a la
+              normativa de consumo. En los demás casos, las partes se someten a los juzgados y
+              tribunales del domicilio del titular. <mark class="pending">[REVISAR CON GESTORÍA]</mark>
+            </p>
+          </section>
+
+          <section class="legal__section" id="cambios" aria-labelledby="cambios-h">
+            <h2 id="cambios-h"><span class="legal__num" aria-hidden="true">{num('cambios')}</span>{titleOf('cambios')}</h2>
+            <p>
+              Podemos actualizar este aviso legal para adaptarlo a cambios legales o del servicio. La
+              versión vigente es la publicada en esta página y la fecha de su última actualización
+              figura al principio ({site.legalActualizado}).
+            </p>
+            <p>
+              Si tienes cualquier duda, escríbenos a <SiteValue value={site.correo} kind="email" />.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
   </article>
 </Base>
-

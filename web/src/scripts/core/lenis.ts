@@ -66,7 +66,13 @@ export function scrollToTarget(
 ): void {
   const lenis = instance;
   if (lenis) {
-    lenis.scrollTo(target, { offset: ANCHOR_OFFSET, immediate: opts.immediate ?? false, force: true });
+    // Lenis recorta el destino a su `limit`, que mide con un ResizeObserver con
+    // retardo (250 ms). Justo después de crear los pins el alto de la página ha
+    // crecido miles de px y el límite aún es el viejo: sin esto, /#contacto
+    // se quedaba a medio camino. Medir ahora es barato (dos lecturas).
+    lenis.resize();
+    const offset = typeof target === 'number' ? 0 : ANCHOR_OFFSET;
+    lenis.scrollTo(target, { offset, immediate: opts.immediate ?? false, force: true });
     return;
   }
   if (typeof target === 'number') {

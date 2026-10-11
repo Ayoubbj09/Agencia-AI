@@ -1,7 +1,19 @@
 ---
 /**
  * 7.5 Para qué negocios (#sectores) — PROPIETARIO: Sección C.
- * Script: src/scripts/sections/sectors.ts (pin + scroll horizontal en escritorio).
+ * Script: src/scripts/sections/sectors.ts
+ *
+ * Tres maquetas con el MISMO marcado:
+ *  1. Base (sin JS, reduced motion, hueco sin modo): rejilla estática, todos los
+ *     paneles visibles (1 columna en filas → 2 → 3 columnas).
+ *  2. Táctil / < 1024 px con JS (html.js.motion + media query): carrusel con
+ *     scroll horizontal nativo y scroll-snap. La lista lleva data-lenis-prevent
+ *     (spec) + data-scroll-x (CONTRACT §6: el scroll vertical nunca se queda
+ *     clavado encima del carrusel).
+ *  3. Escritorio (clase .is-pinned que pone sectors.ts): la sección se fija y la
+ *     pista se desplaza en horizontal. Cada panel: marco 4:5 con la foto 3:4
+ *     dentro (sobra arriba/abajo para el parallax, sin scale), nombre enorme que
+ *     cruza el borde de la foto y una línea de ejemplo. Paneles en zigzag.
  *
  * Fotos: ambientación generada con IA (nunca "clientes" ni "proyectos").
  * Se cargan TODAS las imágenes de src/assets/sectores/ automáticamente: para
@@ -9,8 +21,8 @@
  * Academias pasará solo de composición tipográfica a foto; el alt ya está aquí).
  *
  * <Picture>: formats avif+webp, fallbackFormat 'webp' (por defecto Astro usaría
- * PNG para un .webp), widths 480/800/1086, eager + async (paneles fuera de
- * pantalla por el desplazamiento horizontal).
+ * PNG para un .webp), widths 480/800/1086 (nunca por encima del original),
+ * eager + async (paneles fuera de pantalla por el desplazamiento horizontal).
  */
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -67,119 +79,159 @@ const sectores = [
 ---
 
 <section id="sectores" class="sectors section" aria-labelledby="sectores-title">
-  <div class="sectors__intro container">
-    <p class="eyebrow" data-reveal><span class="eyebrow__index">02</span> Sectores</p>
-    <h2 id="sectores-title" class="sectors__title" data-reveal="split">
-      <em>Empezamos</em> por las inmobiliarias.
-    </h2>
-    <p class="lead sectors__lead" data-reveal>
-      El mismo enfoque se adapta a cualquier negocio que atienda clientes por WhatsApp.
-    </p>
-  </div>
+  {/* Escenario: es lo que se fija (pin) en escritorio. */}
+  <div class="sectors__stage" data-sectors-stage>
+    <div class="sectors__viewport" data-sectors-viewport>
+      <div class="sectors__track" data-sectors-track>
+        <header class="sectors__intro" data-sectors-intro>
+          <p class="eyebrow" data-reveal><span class="eyebrow__index">02</span> Sectores</p>
+          <h2 id="sectores-title" class="sectors__title" data-reveal="split">
+            <em>Empezamos</em> por las inmobiliarias.
+          </h2>
+          <p class="lead sectors__lead" data-reveal>
+            El mismo enfoque se adapta a cualquier negocio que atienda clientes por WhatsApp.
+          </p>
+        </header>
 
-  <div class="sectors__viewport" data-sectors-viewport data-lenis-prevent data-scroll-x>
-    <ul class="sectors__track" role="list" data-sectors-track>
-      {
-        sectores.map((s, i) => (
-          <li class:list={['sector', !s.image && 'sector--type']} data-sector={s.slug} data-cursor="Ver">
-            <article class="sector__card">
-              <div class="sector__frame" data-sector-frame>
-                {s.image ? (
-                  <Picture
-                    src={s.image}
-                    alt={s.alt}
-                    formats={['avif', 'webp']}
-                    fallbackFormat="webp"
-                    widths={[480, 800, 1086]}
-                    sizes="(min-width: 1024px) 480px, 80vw"
-                    loading="eager"
-                    decoding="async"
-                    class="sector__img"
-                    data-sector-img
-                  />
-                ) : (
-                  <div class="sector__type" aria-hidden="true">
-                    <span>{s.name}</span>
+        <ul
+          class="sectors__list"
+          role="list"
+          data-sectors-list
+          data-lenis-prevent
+          data-scroll-x
+        >
+          {
+            sectores.map((s, i) => (
+              <li
+                class:list={['sector', s.image ? 'sector--photo' : 'sector--type']}
+                data-sector={s.slug}
+                data-cursor={s.image ? 'Ver' : undefined}
+              >
+                <div class="sector__card">
+                  <h3 class="sector__name" data-sector-name>
+                    <span class="sector__name-mask">
+                      <span class="sector__name-inner" data-sector-name-inner>
+                        {s.name}
+                      </span>
+                    </span>
+                  </h3>
+
+                  <div class="sector__frame" data-sector-frame>
+                    {s.image ? (
+                      <Picture
+                        src={s.image}
+                        alt={s.alt}
+                        formats={['avif', 'webp']}
+                        fallbackFormat="webp"
+                        widths={[480, 800, 1086]}
+                        sizes="(min-width: 1024px) 480px, 80vw"
+                        loading="eager"
+                        decoding="async"
+                        class="sector__img"
+                        data-sector-img
+                      />
+                    ) : (
+                      <div class="sector__type" aria-hidden="true">
+                        <span class="sector__type-rules"></span>
+                        <span class="sector__glyph">
+                          A<em>a</em>
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div class="sector__body">
-                <span class="sector__index" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <h3 class="sector__name">{s.name}</h3>
-                <p class="sector__line">{s.line}</p>
-              </div>
-            </article>
-          </li>
-        ))
-      }
-      <li class="sector sector--final" data-sector="otros">
-        <article class="sector__card sector__card--final">
-          <h3 class="sector__final-title">
-            Comercios, despachos, centros de estética… ¿Tu sector no está? <em>Hablemos.</em>
-          </h3>
-          <div class="sector__final-cta">
-            <WhatsAppButton label="Escríbenos por WhatsApp" />
-            <PrivacyNote />
-          </div>
-        </article>
-      </li>
-    </ul>
-  </div>
 
-  <p class="sectors__note container" data-reveal="fade">Imágenes ilustrativas.</p>
+                  <p class="sector__meta" data-sector-meta>
+                    <span class="sector__index" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span class="sector__line">{s.line}</span>
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+
+          <li class="sector sector--final" data-sector="otros" data-sector-final>
+            <div class="sector__final">
+              <h3 class="sector__final-title">
+                <span class="sector__final-more" data-final-part>
+                  Comercios, despachos, centros de estética…
+                </span>{' '}
+                <span class="sector__final-ask" data-final-part>
+                  ¿Tu sector no está? <em>Hablemos.</em>
+                </span>
+              </h3>
+              {/* El botón es magnético: el reveal va en este envoltorio, nunca en el botón. */}
+              <div class="sector__final-cta" data-final-part>
+                <WhatsAppButton label="Escríbenos por WhatsApp" />
+                <PrivacyNote />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sectors__foot">
+      <p class="sectors__note">Imágenes ilustrativas.</p>
+      <span class="sectors__progress" aria-hidden="true">
+        <span class="sectors__progress-fill" data-sectors-progress></span>
+      </span>
+    </div>
+  </div>
 </section>
 
 <style>
+  /* ==========================================================================
+     1. BASE — sin JS / reduced motion: rejilla estática, todo visible
+     ========================================================================== */
+  .sectors__track {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
   .sectors__intro {
     display: grid;
+    justify-items: start;
     gap: var(--space-m);
     margin-bottom: var(--space-xl);
   }
   .sectors__title {
-    max-width: 12em;
+    max-width: 9.5em;
   }
   .sectors__title em {
     color: var(--accent);
   }
 
-  /* Versión base (sin JS / táctil): carrusel nativo con scroll-snap. */
-  .sectors__viewport {
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
+  .sectors__list {
+    display: grid;
+    gap: var(--space-l) var(--grid-gap);
   }
-  .sectors__viewport::-webkit-scrollbar {
-    display: none;
-  }
-  .sectors__track {
-    display: flex;
-    gap: var(--grid-gap);
-    width: max-content;
-    padding-inline: var(--gutter);
-    padding-bottom: var(--space-s);
-  }
-  .sector {
-    flex: none;
-    width: min(80vw, 30rem);
-    scroll-snap-align: start;
-  }
+
   .sector__card {
     display: grid;
-    gap: var(--space-m);
+    grid-template-areas: 'frame' 'name' 'meta';
+    align-content: start;
+    row-gap: var(--space-xs);
   }
+
   /* Marco 4:5 sobre una foto 3:4: sobra un poco arriba/abajo para el parallax. */
   .sector__frame {
+    grid-area: frame;
     position: relative;
     aspect-ratio: 4 / 5;
     overflow: hidden;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     background: var(--bg-elev);
+    container-type: inline-size;
+    margin-bottom: var(--space-2xs);
   }
-  .sector__frame :global(picture),
+  .sector__frame :global(picture) {
+    position: absolute;
+    inset: 0;
+  }
   .sector__frame :global(img) {
     position: absolute;
     inset: 0;
@@ -187,73 +239,472 @@ const sectores = [
     height: 100%;
     object-fit: cover;
   }
-  .sector__type {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: end start;
-    padding: var(--space-m);
-    background:
-      radial-gradient(80% 60% at 70% 20%, rgb(255 107 44 / 0.22), transparent 70%),
-      var(--bg-elev);
-  }
-  .sector__type span {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
-    line-height: 0.9;
-    letter-spacing: -0.02em;
-    color: var(--accent-soft);
-  }
-  .sector__body {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: var(--space-s);
-    row-gap: 0.4rem;
-  }
-  .sector__index {
-    grid-row: span 2;
-    font-size: var(--fs-xs);
-    color: var(--accent);
-    padding-top: 0.6em;
-    font-variant-numeric: tabular-nums;
-  }
+
   .sector__name {
+    grid-area: name;
+    position: relative;
+    z-index: var(--z-raised);
     font-size: var(--fs-h3);
+    font-weight: var(--fw-medium);
+    line-height: 0.95;
+    letter-spacing: var(--tracking-heading);
+    text-wrap: nowrap;
   }
-  .sector__line {
+  /* Máscara para la entrada del nombre (con aire para tildes y descendentes). */
+  .sector__name-mask {
+    display: block;
+    overflow: clip;
+    padding-block: 0.12em 0.14em;
+    margin-block: -0.12em -0.14em;
+  }
+  .sector__name-inner {
+    display: block;
+  }
+
+  .sector__meta {
+    grid-area: meta;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
     color: var(--text-muted);
     max-width: 34ch;
   }
-
-  .sector--final {
-    width: min(86vw, 36rem);
+  .sector__index {
+    flex: none;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.15em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
   }
-  .sector__card--final {
-    height: 100%;
-    align-content: space-between;
-    gap: var(--space-xl);
+
+  /* ── Panel tipográfico (Academias, mientras no haya foto) ─────────────────
+     Cuaderno: luz ámbar de atardecer, pauta de renglones, línea de margen y un
+     "Aa" de muestrario tipográfico. Todo decorativo (aria-hidden). */
+  .sector__type {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        80% 55% at 96% 0%,
+        color-mix(in srgb, var(--accent-soft) 30%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        110% 80% at 85% 10%,
+        color-mix(in srgb, var(--accent) 26%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        80% 40% at 30% 104%,
+        color-mix(in srgb, var(--accent) 14%, transparent),
+        transparent 75%
+      ),
+      var(--bg-elev);
+  }
+  .sector__type-rules {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(7.4cqi - 1px),
+      var(--line) calc(7.4cqi - 1px),
+      var(--line) 7.4cqi
+    );
+    -webkit-mask-image: linear-gradient(to bottom, transparent 8%, black 42%, black 92%, transparent);
+    mask-image: linear-gradient(to bottom, transparent 8%, black 42%, black 92%, transparent);
+  }
+  /* Línea de margen del cuaderno. */
+  .sector__type::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 15%;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--accent) 55%, transparent) 30%,
+      color-mix(in srgb, var(--accent) 30%, transparent)
+    );
+  }
+  .sector__glyph {
+    position: absolute;
+    left: 21%;
+    bottom: 9%;
+    font-family: var(--font-serif);
+    font-size: 54cqi;
+    line-height: 0.8;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .sector__glyph em {
+    font-style: italic;
+    color: var(--accent-soft);
+  }
+
+  /* ── Panel final (tipográfico, con WhatsApp) ─────────────────────────────── */
+  .sector--final {
+    grid-column: 1 / -1;
+  }
+  .sector__final {
+    display: grid;
+    gap: var(--space-l);
     padding: var(--space-l);
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
-    background: var(--bg-elev);
+    background:
+      radial-gradient(
+        70% 90% at 100% 100%,
+        color-mix(in srgb, var(--accent) 10%, transparent),
+        transparent 70%
+      ),
+      var(--bg-elev);
   }
   .sector__final-title {
-    font-size: var(--fs-h3);
-    line-height: 1.12;
+    font-size: clamp(2rem, 1rem + 3.2vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: var(--tracking-display);
+    max-width: 16em;
   }
+  .sector__final-more,
+  .sector__final-ask {
+    display: block;
+  }
+  .sector__final-more {
+    color: var(--text-muted);
+  }
+  /* "Hablemos." en su propia línea (el reset global de <em> en titulares le
+     pone line-height 0: aquí es un bloque, necesita su interlineado). */
   .sector__final-title em {
+    display: block;
+    line-height: 1.02;
     color: var(--accent);
   }
   .sector__final-cta {
     display: grid;
     gap: var(--space-s);
     justify-items: start;
+    align-content: end;
   }
 
+  /* Pie de sección: nota + progreso (el progreso solo con JS). */
+  .sectors__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    max-width: var(--container-max);
+    margin: var(--space-l) auto 0;
+    padding-inline: var(--gutter);
+  }
   .sectors__note {
-    margin-top: var(--space-m);
     font-size: var(--fs-xs);
+    letter-spacing: 0.02em;
     color: var(--text-muted);
+  }
+  .sectors__progress {
+    display: none;
+    position: relative;
+    flex: none;
+    inline-size: clamp(6rem, 4rem + 8vw, 12rem);
+    block-size: 2px;
+    border-radius: 2px;
+    background: var(--line-strong);
+    overflow: hidden;
+  }
+  .sectors__progress-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+  }
+
+  /* Rejilla: filas compactas en móvil → 2 → 3 columnas (≤ 480 px por foto). */
+  @media (max-width: 39.99em) {
+    .sector__card {
+      grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
+      grid-template-areas: 'frame name' 'frame meta';
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-s);
+    }
+    .sector__frame {
+      margin-bottom: 0;
+    }
+    .sector__name {
+      align-self: end;
+      font-size: clamp(1.5rem, 1rem + 2.4vw, 2rem);
+      text-wrap: wrap;
+    }
+    .sector__meta {
+      flex-direction: column;
+      gap: var(--space-3xs);
+      font-size: var(--fs-sm);
+    }
+    .sector__index {
+      order: -1;
+    }
+  }
+  @media (min-width: 40em) {
+    .sectors__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64em) {
+    .sectors__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .sector__final {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      align-items: end;
+      padding: var(--space-xl);
+    }
+  }
+
+  /* ==========================================================================
+     2. TÁCTIL / < 1024 px con JS: carrusel nativo con scroll-snap
+     (misma consulta que la condición `touch` de core/media.ts)
+     ========================================================================== */
+  @media (max-width: 1023px), (pointer: coarse) {
+    :global(html.js.motion) .sectors__track {
+      max-width: none;
+      padding-inline: 0;
+    }
+    :global(html.js.motion) .sectors__intro {
+      max-width: var(--container-max);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+    :global(html.js.motion) .sectors__list {
+      --card-w: min(78vw, 25rem);
+      display: flex;
+      align-items: stretch;
+      gap: var(--grid-gap);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      padding: var(--space-2xs) var(--gutter) var(--space-s);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    :global(html.js.motion) .sectors__list::-webkit-scrollbar {
+      display: none;
+    }
+    /* Margen final fiable (algunos navegadores ignoran el padding final de un flex con scroll). */
+    :global(html.js.motion) .sectors__list::after {
+      content: '';
+      flex: none;
+      inline-size: max(1px, calc(var(--gutter) - var(--grid-gap)));
+    }
+    :global(html.js.motion) .sector {
+      flex: none;
+      inline-size: var(--card-w);
+      scroll-snap-align: start;
+    }
+    :global(html.js.motion) .sector__card {
+      grid-template-columns: none;
+      grid-template-areas: 'frame' 'name' 'meta';
+      grid-template-rows: none;
+    }
+    :global(html.js.motion) .sector__frame {
+      margin-bottom: 0;
+    }
+    /* El nombre cruza el borde inferior de la foto. */
+    :global(html.js.motion) .sector__name {
+      align-self: auto;
+      font-size: clamp(2.25rem, 1.2rem + 5vw, 3.75rem);
+      text-wrap: nowrap;
+      margin-top: calc(-0.5em - var(--space-xs));
+      padding-inline-start: var(--space-s);
+      text-shadow: 0 0.04em 0.6em color-mix(in srgb, var(--bg) 55%, transparent);
+    }
+    :global(html.js.motion) .sector__meta {
+      flex-direction: row;
+      gap: var(--space-xs);
+      padding-inline: var(--space-s) var(--space-2xs);
+      font-size: var(--fs-base);
+    }
+    :global(html.js.motion) .sector__index {
+      order: 0;
+    }
+    /* Foto 3:4 más alta que el marco 4:5: parallax mínimo sin escalar. */
+    :global(html.js.motion) .sector__frame :global(img) {
+      inset: 0 auto auto 0;
+      height: auto;
+      aspect-ratio: 3 / 4;
+    }
+    :global(html.js.motion) .sector--photo .sector__frame::after,
+    :global(html.js.motion) .sector--type .sector__frame::after {
+      content: '';
+      position: absolute;
+      inset: 55% 0 0;
+      background: linear-gradient(to top, color-mix(in srgb, var(--bg) 60%, transparent), transparent);
+      pointer-events: none;
+    }
+    :global(html.js.motion) .sector--final {
+      inline-size: min(86vw, 30rem);
+    }
+    :global(html.js.motion) .sector__final {
+      block-size: 100%;
+      grid-template-columns: none;
+      align-content: space-between;
+      padding: var(--space-l) var(--space-m);
+    }
+    :global(html.js.motion) .sector__final-title {
+      font-size: clamp(2rem, 1.2rem + 3.6vw, 3.25rem);
+    }
+    :global(html.js.motion) .sectors__foot {
+      margin-top: var(--space-m);
+    }
+    :global(html.js.motion) .sectors__progress {
+      display: block;
+    }
+  }
+
+  /* ==========================================================================
+     3. ESCRITORIO (.is-pinned, lo pone sectors.ts): pin + pista horizontal
+     ========================================================================== */
+  .sectors.is-pinned {
+    --frame-h: min(56svh, 37.5rem);
+    --frame-w: calc(var(--frame-h) * 0.8); /* ≤ 30rem = 480 px */
+    --name-size: clamp(3.5rem, min(7vw, 12.5svh), 9.5rem);
+    --panel-gap: clamp(5rem, 1rem + 7vw, 11rem);
+    padding-block: 0;
+  }
+  .is-pinned .sectors__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* la pista no ensancha el escenario */
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100vh;
+    height: 100svh;
+    padding-top: var(--nav-h);
+  }
+  .is-pinned .sectors__viewport {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: clip;
+  }
+  .is-pinned .sectors__track {
+    display: flex;
+    align-items: center;
+    gap: var(--panel-gap);
+    width: max-content;
+    max-width: none;
+    margin: 0;
+    padding-inline: var(--gutter) clamp(6rem, 2rem + 10vw, 14rem);
+  }
+  .is-pinned .sectors__intro {
+    flex: none;
+    inline-size: clamp(26rem, 38vw, 44rem);
+    margin: 0;
+    align-content: center;
+  }
+  .is-pinned .sectors__title {
+    max-width: 8.5em;
+  }
+  .is-pinned .sectors__list {
+    display: flex;
+    align-items: center;
+    gap: var(--panel-gap);
+  }
+  .is-pinned .sector {
+    flex: none;
+  }
+
+  /* Panel: foto arriba, nombre cruzando su borde inferior, línea debajo.
+     Columnas: [36 % del marco][64 % del marco][lo que sobresalga el nombre]. */
+  .is-pinned .sector__card {
+    grid-template-columns: calc(var(--frame-w) * 0.36) calc(var(--frame-w) * 0.64) auto;
+    grid-template-areas:
+      'frame frame .'
+      '.     name  name'
+      '.     meta  meta';
+    row-gap: 0;
+  }
+  .is-pinned .sector__frame {
+    inline-size: var(--frame-w);
+    margin: 0;
+    border-radius: var(--radius-xs);
+  }
+  .is-pinned .sector__frame :global(img) {
+    inset: 0 auto auto 0;
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+  /* Velo sutil donde el nombre pisa la foto (legibilidad). */
+  .is-pinned .sector__frame::after {
+    content: '';
+    position: absolute;
+    inset: 62% 0 0;
+    background: linear-gradient(to top, color-mix(in srgb, var(--bg) 42%, transparent), transparent);
+    pointer-events: none;
+  }
+  .is-pinned .sector__name {
+    font-size: var(--name-size);
+    line-height: 0.9;
+    letter-spacing: var(--tracking-display);
+    margin-top: calc(var(--name-size) * -0.54);
+    text-shadow: 0 0.03em 0.5em color-mix(in srgb, var(--bg) 50%, transparent);
+  }
+  .is-pinned .sector__meta {
+    margin-top: var(--space-m);
+    font-size: var(--fs-lg);
+    line-height: 1.4;
+    max-width: 26ch;
+  }
+
+  /* Zigzag: los paneles pares van al revés (texto arriba, foto abajo). */
+  .is-pinned .sector:nth-child(even) .sector__card {
+    grid-template-areas:
+      '.     meta  meta'
+      '.     name  name'
+      'frame frame .';
+  }
+  .is-pinned .sector:nth-child(even) .sector__name {
+    margin-top: 0;
+    margin-bottom: calc(var(--name-size) * -0.5);
+  }
+  .is-pinned .sector:nth-child(even) .sector__meta {
+    margin-top: 0;
+    margin-bottom: var(--space-m);
+  }
+  .is-pinned .sector:nth-child(even) .sector__frame::after {
+    inset: 0 0 62%;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 42%, transparent), transparent);
+  }
+
+  /* Panel final: cierre tipográfico con mucho aire. */
+  .is-pinned .sector--final {
+    inline-size: clamp(30rem, 42vw, 50rem);
+  }
+  .is-pinned .sector__final {
+    grid-template-columns: none;
+    gap: var(--space-l);
+    padding: var(--space-s) 0 var(--space-s) var(--space-l);
+    border: 0;
+    border-left: 1px solid var(--line-strong);
+    border-radius: 0;
+    background: none;
+  }
+  .is-pinned .sector__final-title {
+    font-size: clamp(2.5rem, 0.6rem + 3vw, 4.75rem);
+    max-width: none;
+  }
+
+  .is-pinned .sectors__foot {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-block: var(--space-m);
+  }
+  .is-pinned .sectors__progress {
+    display: block;
   }
 </style>

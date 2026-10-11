@@ -2,7 +2,14 @@
 /**
  * 7.7 Contacto (#contacto) — PROPIETARIO: Sección D. Script: src/scripts/sections/contact.ts
  *
+ *  - Titular enorme "Pásanos el relevo." (palabras con máscara al entrar).
+ *  - Luz ámbar de fondo que "amanece" al llegar (cierra el círculo con el hero).
+ *  - Botón grande de WhatsApp, magnético, con el número visible.
+ *  - Microtexto del agente de IA (si avisoAgenteIA) y primera capa de privacidad.
+ *  - Correo, teléfono y WhatsApp desde site.ts (los pendientes, resaltados).
+ *
  * Sin formulario por ahora (ver comentario al final del marcado).
+ * Sin JS / reduced motion: todo visible y estático (la luz, en su estado final).
  */
 import { site } from '../../config/site';
 import WhatsAppButton from '../WhatsAppButton.astro';
@@ -11,20 +18,28 @@ import SiteValue from '../SiteValue.astro';
 ---
 
 <section id="contacto" class="contact section" aria-labelledby="contacto-title">
+  {/* Luz de fondo (decorativa). La anima contact.ts; sin JS se ve tal cual. */}
+  <div class="contact__light" aria-hidden="true">
+    <div class="contact__glow" data-contact-glow></div>
+  </div>
+
   <div class="contact__inner container">
     <p class="eyebrow" data-reveal><span class="eyebrow__index">04</span> Contacto</p>
 
-    <h2 id="contacto-title" class="mega contact__title" data-reveal="split">
+    <h2 id="contacto-title" class="mega contact__title" data-reveal="manual" data-contact-title>
       Pásanos el <em>relevo</em>.
     </h2>
 
+    {/* Orden del DOM = orden de lectura en móvil: texto → botón → datos.
+        En escritorio la rejilla coloca los datos bajo el texto. */}
     <div class="contact__body">
       <p class="contact__text" data-reveal>
         Cuéntanos cómo es tu negocio y te decimos si un agente tiene sentido para ti.
       </p>
 
-      <div class="contact__action" data-reveal-group>
-        <div data-reveal>
+      <div class="contact__action" data-reveal-group="0.1">
+        {/* El botón es magnético (transform): el reveal va en el envoltorio. */}
+        <div class="contact__cta" data-reveal>
           <WhatsAppButton label="Escríbenos por WhatsApp" size="lg" showNumber magnetic={0.3} />
         </div>
         {
@@ -35,32 +50,52 @@ import SiteValue from '../SiteValue.astro';
             </p>
           )
         }
-        <div data-reveal><PrivacyNote /></div>
+        <div data-reveal><PrivacyNote class="contact__privacy" /></div>
       </div>
 
-      <dl class="contact__details" data-reveal>
-        <div>
-          <dt>Correo</dt>
-          <dd><SiteValue value={site.correo} kind="email" /></dd>
-        </div>
-        <div>
-          <dt>Teléfono</dt>
-          <dd><SiteValue value={site.telefono} kind="tel" /></dd>
-        </div>
-      </dl>
+      <div class="contact__details" data-reveal>
+        <span class="contact__rule" aria-hidden="true" data-contact-rule></span>
+        <dl>
+          <div>
+            <dt>WhatsApp</dt>
+            <dd>
+              <a
+                class="link link--underlined"
+                href={site.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="Escribir"
+              >
+                <span class="nowrap">{site.whatsapp}</span>
+                <span class="sr-only"> (se abre WhatsApp en una pestaña nueva)</span>
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt>Correo</dt>
+            <dd><SiteValue value={site.correo} kind="email" /></dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd><SiteValue value={site.telefono} kind="tel" /></dd>
+          </div>
+        </dl>
+      </div>
     </div>
 
     {
       /*
-        FORMULARIO FUTURO (desactivado — no hay ninguna URL a propósito).
-        Iría aquí, junto al botón de WhatsApp, enviando a un webhook de n8n.
+        FORMULARIO FUTURO (desactivado; a propósito no hay ninguna URL).
+        Iría aquí, en .contact__action, junto al botón de WhatsApp, y enviaría
+        los datos a un webhook de n8n.
 
         Al activarlo: añadir junto al botón de enviar la primera capa de
         información (responsable, finalidad, enlace a /privacidad), sin casillas
         premarcadas, y actualizar /privacidad con los campos que se recogen y el
         proveedor del servidor de n8n.
 
-        <form class="contact__form" method="post" action="(URL del webhook de n8n)">
+        Esqueleto orientativo (el atributo action queda vacío hasta tener el webhook):
+        <form class="contact__form" method="post" action="">
           <label>Nombre <input name="nombre" autocomplete="name" required /></label>
           <label>Teléfono <input name="telefono" type="tel" autocomplete="tel" required /></label>
           <label>Mensaje <textarea name="mensaje" rows="4"></textarea></label>
@@ -74,61 +109,168 @@ import SiteValue from '../SiteValue.astro';
 
 <style>
   .contact {
+    position: relative;
+    isolation: isolate;
+    overflow: clip; /* la luz no invade el pie ni crea scroll lateral */
     padding-bottom: var(--space-2xl);
   }
+
+  /* ── Luz ámbar ─────────────────────────────────────────────────────────── */
+  .contact__light {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+    /* La luz se apaga antes del borde inferior: sin corte duro contra el pie. */
+    -webkit-mask-image: linear-gradient(to bottom, var(--bg) 62%, transparent 99%);
+    mask-image: linear-gradient(to bottom, var(--bg) 62%, transparent 99%);
+  }
+  .contact__glow {
+    position: absolute;
+    left: 50%;
+    bottom: -12%;
+    width: min(140vw, 110rem);
+    aspect-ratio: 1.6;
+    margin-left: calc(min(140vw, 110rem) / -2);
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--accent) 20%, transparent),
+      color-mix(in srgb, var(--accent) 9%, transparent) 38%,
+      color-mix(in srgb, var(--accent-soft) 3%, transparent) 62%,
+      transparent 100%
+    );
+  }
+
   .contact__inner {
+    container-type: inline-size; /* el titular se mide contra este ancho (cqi) */
+    position: relative;
     display: grid;
     gap: var(--space-l);
   }
+
+  /* ── Titular ───────────────────────────────────────────────────────────── */
   .contact__title {
     margin-block: var(--space-s) var(--space-m);
+    /* Algo más compacto que .mega: en una línea desde ~768 px. El titular
+       mide ≈ 6,5 em: con cqi nunca pasa del ancho del contenedor (1920 px…). */
+    font-size: clamp(3.4rem, 0.4rem + 12.6vw, 14rem);
+    font-size: max(3.4rem, min(0.4rem + 12.6vw, 100cqi / 6.7));
+    letter-spacing: -0.06em;
+    text-wrap: balance;
   }
   .contact__title em {
     color: var(--accent);
+    letter-spacing: -0.03em;
   }
+
+  /* ── Cuerpo: una columna en móvil; dos en escritorio ──────────────────── */
   .contact__body {
     display: grid;
     gap: var(--space-xl);
   }
   @media (min-width: 64em) {
     .contact__body {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-areas:
+        'text action'
+        'details action';
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(3rem, 6vw, 8rem);
+      row-gap: var(--space-xl);
       align-items: start;
     }
+    .contact__text {
+      grid-area: text;
+    }
+    .contact__action {
+      grid-area: action;
+    }
     .contact__details {
-      grid-column: 2;
+      grid-area: details;
     }
   }
   .contact__text {
     font-size: var(--fs-xl);
-    line-height: 1.35;
+    line-height: 1.3;
     letter-spacing: var(--tracking-tight);
-    max-width: 24ch;
+    max-width: 22ch;
   }
+
+  /* Datos de contacto: lista en fila con filete superior que se dibuja. */
+  .contact__details {
+    position: relative;
+    padding-top: var(--space-2xs);
+    max-width: 34rem;
+  }
+  .contact__rule {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--line-strong);
+    transform-origin: left center;
+  }
+  /* Ficha: etiqueta a la izquierda, dato a la derecha, filetes entre filas. */
+  .contact__details dl > div {
+    display: grid;
+    grid-template-columns: clamp(5.5rem, 4rem + 4vw, 7.5rem) minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-s);
+    padding-block: 0.95rem;
+  }
+  .contact__details dl > div + div {
+    border-top: 1px solid var(--line);
+  }
+  .contact__details dt {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .contact__details dd {
+    font-size: var(--fs-lg);
+    letter-spacing: var(--tracking-tight);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Acción: botón grande + microtextos ────────────────────────────────── */
   .contact__action {
     display: grid;
     gap: var(--space-m);
     justify-items: start;
   }
+  /* Botón aún más presente que .btn--lg (sin tocar el componente compartido). */
+  .contact__cta :global(.wa-btn) {
+    --btn-h: clamp(4.5rem, 3.4rem + 3.2vw, 6.75rem);
+    --btn-px: clamp(1.6rem, 1rem + 2vw, 3.25rem);
+    font-size: clamp(1.2rem, 0.95rem + 1.1vw, 2.125rem);
+    gap: 0.75em;
+  }
+  .contact__cta :global(.wa-btn svg) {
+    width: 1.35em;
+    height: 1.35em;
+  }
+  /* En móvil estrecho la etiqueta puede partirse en dos líneas sin desbordar. */
+  @media (max-width: 26em) {
+    .contact__cta,
+    .contact__cta :global(.wa-btn) {
+      width: 100%;
+    }
+    .contact__cta :global(.wa-btn) {
+      white-space: normal;
+      justify-content: flex-start;
+    }
+  }
   .contact__ai {
     font-size: var(--fs-sm);
+    line-height: 1.55;
     color: var(--text);
-    max-width: 48ch;
+    max-width: 46ch;
     padding-inline-start: 1rem;
     border-inline-start: 2px solid var(--accent);
   }
-  .contact__details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-m) var(--space-xl);
-    padding-top: var(--space-m);
-    border-top: 1px solid var(--line);
-  }
-  .contact__details dt {
-    font-size: var(--fs-2xs);
-    letter-spacing: var(--tracking-caps);
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.35rem;
+  .contact__action :global(.contact__privacy) {
+    max-width: 46ch;
   }
 </style>

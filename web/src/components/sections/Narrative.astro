@@ -2,15 +2,24 @@
 /**
  * 7.2 Narración (#narracion) — PROPIETARIO: Sección A. Script: src/scripts/sections/narrative.ts
  *
- * Escena ilustrativa (sin datos ni porcentajes). Cada frase se ilumina palabra a
- * palabra con el scroll (opacity 0.2 → 1; no se anima color). Para lectores de
- * pantalla: SplitText con aria 'hidden' + copia en .sr-only (lo añade el script
- * o el propio marcado al implementarlo).
+ * Escena ilustrativa (sin datos ni porcentajes): cuatro frases grandes que se
+ * iluminan palabra a palabra con el scroll (opacity 0.2 → 1; nunca se anima
+ * `color`). La última es la respuesta: "A cualquier hora." en serif cursiva
+ * naranja, con un resplandor ámbar detrás que se enciende con ella (eco de la
+ * luz del hero).
+ *
+ * Accesibilidad: con JS, narrative.ts parte cada frase con SplitText
+ * (aria 'hidden' en la frase) e inserta antes una copia en <span class="sr-only">.
+ * Sin JS / reduced motion: frases normales, completas y legibles.
+ * data-reveal="manual": ocultas bajo html.js.motion hasta que el script las
+ * parte (salvavidas CSS de 3 s si el JS no llega).
  */
+// Cada frase en segmentos de lectura (un segmento por línea cuando cabe):
+// el corte lo decide el sentido, no el ancho de la pantalla.
 const frases = [
-  { text: 'Son las 23:47. Alguien pregunta por un piso.' },
-  { text: 'Nadie contesta.' },
-  { text: 'Mañana ya habrá escrito a otra inmobiliaria.' },
+  ['Son las 23:47.', 'Alguien pregunta por un piso.'],
+  ['Nadie contesta.'],
+  ['Mañana ya habrá escrito', 'a otra inmobiliaria.'],
 ];
 ---
 
@@ -19,39 +28,94 @@ const frases = [
 
   <div class="narrative__inner container">
     {
-      frases.map((f, i) => (
-        <p class:list={['statement', 'narrative__line', `narrative__line--${i + 1}`]} data-reveal>
-          {f.text}
-        </p>
+      frases.map((segmentos, i) => (
+        <div class:list={['narrative__item', `narrative__item--${i + 1}`]}>
+          <p class="statement narrative__line" data-narrative-line data-reveal="manual">
+            {segmentos.map((seg, j) => (
+              <>
+                {j > 0 && ' '}
+                <span class="narrative__seg">{seg}</span>
+              </>
+            ))}
+          </p>
+        </div>
       ))
     }
-    <p class="statement narrative__line narrative__line--final" data-reveal>
-      Con Relevo IA, tu negocio contesta. <em>A cualquier hora.</em>
-    </p>
+    <div class="narrative__item narrative__item--final">
+      <span class="narrative__glow" data-narrative-glow aria-hidden="true"></span>
+      <p
+        class="statement narrative__line narrative__line--final"
+        data-narrative-line
+        data-reveal="manual"
+      >
+        <span class="narrative__seg">Con Relevo IA,</span>
+        <span class="narrative__seg">tu negocio contesta.</span>
+        <em>A cualquier hora.</em>
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
+  .narrative {
+    padding-block: var(--section-space);
+  }
   .narrative__inner {
     display: grid;
     gap: var(--space-2xl);
   }
-  .narrative__line {
-    max-width: 16em;
+  .narrative__item {
+    position: relative;
   }
-  .narrative__line--2 {
+  .narrative__line {
+    position: relative;
+    max-width: 13.5em;
+  }
+  .narrative__seg {
+    display: block;
+  }
+
+  /* Ritmo editorial: izquierda · derecha (el silencio) · sangrada · respuesta. */
+  .narrative__item--2 {
     justify-self: end;
     text-align: right;
   }
-  .narrative__line--final {
-    max-width: 14em;
+  .narrative__item--final {
+    margin-top: var(--space-l);
   }
+  .narrative__line--final {
+    max-width: 15em;
+  }
+  /* "A cualquier hora." en su propia línea. Interlineado propio: el global de
+     los <em> en titulares es 0 (pensado para acentos dentro de una línea). */
   .narrative__line--final em {
+    display: block;
+    line-height: 1.08;
     color: var(--accent);
   }
   @media (min-width: 64em) {
-    .narrative__line--3 {
-      margin-inline-start: 18%;
+    .narrative__item--3 {
+      margin-inline-start: 16%;
     }
+    .narrative__item--final {
+      margin-inline-start: 8%;
+    }
+  }
+
+  /* Resplandor ámbar detrás de la respuesta (decorativo, solo opacity/transform). */
+  .narrative__glow {
+    position: absolute;
+    left: 30%;
+    top: 55%;
+    width: min(120vw, 90rem);
+    aspect-ratio: 2.2;
+    translate: -50% -50%;
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--accent-deep) 70%, transparent),
+      color-mix(in srgb, var(--accent-deep) 22%, transparent) 50%,
+      transparent
+    );
   }
 </style>

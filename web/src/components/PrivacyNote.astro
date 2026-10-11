@@ -14,10 +14,9 @@ const { class: className } = Astro.props;
 
 <p class:list={['privacy-note', className]}>
   Al escribirnos, <SiteValue value={site.nombreLegal} /> tratará tu nombre, tu teléfono y tus mensajes
-  para responder a tu consulta. Más información en la <a
-    class="link link--underlined"
-    href="/privacidad">política de privacidad</a
-  >.
+  para responder a tu consulta. Más información en la <span class="nowrap"
+    ><a class="link link--underlined" href="/privacidad">política de privacidad</a>.</span
+  >
 </p>
 
 <style>
