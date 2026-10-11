@@ -45,7 +45,7 @@ export const site: SiteConfig = {
   direccion: '[PENDIENTE: DIRECCIÓN]',
 
   // Correo de contacto. Sale en el pie, en Contacto y en las páginas legales.
-  correo: '[PENDIENTE: CORREO]',
+  correo: 'boujlikhayoub1@gmail.com',
 
   // Teléfono de contacto (puede ser el mismo que el de WhatsApp).
   telefono: '[PENDIENTE: TELÉFONO]',
