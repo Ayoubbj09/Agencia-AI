@@ -7,11 +7,14 @@
  *   3. Lenis (si no hay reduced motion) → cursor y magnéticos (solo desktop) → nav.
  *   4. Por cada sección, EN ORDEN DE PÁGINA: reveals genéricos de esa sección y
  *      luego su init(ctx). Así los ScrollTriggers se crean en el orden en que
- *      aparecen (necesario con pins).
+ *      aparecen (necesario con pins). Cada sección en su propia tarea (se cede
+ *      el hilo entre una y otra): sin una tarea larga única al arrancar.
  *   5. html.anim-ready en cuanto todo está montado (desactiva el salvavidas CSS
  *      de 3 s: a partir de aquí manda el JS).
- *   6. Tras document.fonts.ready: ScrollTrigger.refresh() y salto al #ancla si la
- *      URL trae una (spec §9); luego se resuelve ctx.ready.
+ *   6. Tras document.fonts.ready y el montaje: ScrollTrigger.refresh() y salto
+ *      al #ancla si la URL trae una (spec §9); luego se resuelve ctx.ready.
+ *   (1b) Al cambiar de modo en vivo (escritorio ⇄ táctil) se conserva el punto
+ *      de lectura: ver recordSpot/restoreSpot.
  *
  * Las secciones NO editan este archivo: solo su src/scripts/sections/<x>.ts.
  */
@@ -176,9 +179,9 @@ if (main) {
   });
 }
 
-for (const [selector, init, name] of SECTIONS) {
+function initSection([selector, init, name]: (typeof SECTIONS)[number]): void {
   const root = document.querySelector<HTMLElement>(selector);
-  if (!root) continue;
+  if (!root) return;
 
   // a) Reveals genéricos ([data-reveal]) de esta sección, antes que sus pins.
   mm.add(conditions, (self) => {
@@ -202,15 +205,33 @@ for (const [selector, init, name] of SECTIONS) {
   }
 }
 
-/* ── Año del pie siempre actual (el HTML trae el del build) ─────────────── */
-document.querySelectorAll<HTMLElement>('[data-current-year]').forEach((el) => {
-  el.textContent = String(new Date().getFullYear());
-});
+/** Cede el hilo principal entre secciones (scheduler.yield si existe). */
+const yieldToMain = (): Promise<void> => {
+  const s = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  return s?.yield ? s.yield() : new Promise((resolve) => setTimeout(resolve, 0));
+};
 
-/* ── 5. El JS ya controla los reveals: fuera el salvavidas CSS de 3 s ───────
-   Se pone aquí (y no tras las fuentes) para que, si las fuentes tardan más de
-   3 s, el salvavidas no muestre el contenido y luego se vuelva a ocultar. */
-html.classList.add('anim-ready');
+/* Las secciones se montan EN ORDEN, pero cada una en su propia tarea: así el
+   arranque no es una única tarea larga de >100 ms que bloquee el primer pintado
+   y la interacción (TBT). El hero va primero y sin esperas (su titular entra ya).
+   Lo de debajo de la pantalla queda oculto por CSS hasta su reveal, así que
+   montarlo unos milisegundos después no se ve. */
+const sectionsMounted = (async () => {
+  for (let i = 0; i < SECTIONS.length; i++) {
+    if (i > 0) await yieldToMain();
+    initSection(SECTIONS[i]);
+  }
+
+  /* ── Año del pie siempre actual (el HTML trae el del build) ─────────────── */
+  document.querySelectorAll<HTMLElement>('[data-current-year]').forEach((el) => {
+    el.textContent = String(new Date().getFullYear());
+  });
+
+  /* ── 5. El JS ya controla los reveals: fuera el salvavidas CSS de 3 s ─────
+     Se pone aquí (y no tras las fuentes) para que, si las fuentes tardan más de
+     3 s, el salvavidas no muestre el contenido y luego se vuelva a ocultar. */
+  html.classList.add('anim-ready');
+})();
 
 /* ── 6. Fuentes listas → refresh → ancla → ctx.ready ──────────────────────── */
 const fontsReady: Promise<unknown> = document.fonts?.ready ?? Promise.resolve();
@@ -237,17 +258,15 @@ function jumpToHash(): void {
   }
 }
 
-fontsReady
-  .catch(() => undefined)
-  .then(() => {
-    ScrollTrigger.refresh();
-    jumpToHash();
-    resolveReady();
-  });
+Promise.all([fontsReady.catch(() => undefined), sectionsMounted]).then(() => {
+  ScrollTrigger.refresh();
+  jumpToHash();
+  resolveReady();
+});
 
 // El navegador vuelve a hacer su propio salto al fragmento al terminar `load`
 // (sin offset y con los pins ya medidos de otra forma): se corrige otra vez.
-pageLoaded.then(() => requestAnimationFrame(jumpToHash));
+Promise.all([pageLoaded, sectionsMounted]).then(() => requestAnimationFrame(jumpToHash));
 
 // Cualquier refresh posterior (el automático de ScrollTrigger en `load`, el de
 // las imágenes...) cambia el espacio de los pins: si la persona aún no se ha
