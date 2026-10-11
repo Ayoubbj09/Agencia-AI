@@ -1,0 +1,13 @@
+# Este repositorio solo contiene la web (carpeta web/).
+# Por seguridad, nunca se suben carpetas ni archivos privados de la agencia
+# aunque se copien aquí por error.
+n8n/
+supabase/
+backups-db/
+web-assets/
+.env
+.env*
+.mcp.json
+.claude/settings.local.json
+node_modules/
+.DS_Store
