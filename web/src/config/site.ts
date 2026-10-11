@@ -36,7 +36,9 @@ export const site: SiteConfig = {
 
   // Nombre de la persona o empresa titular (autónomo o sociedad), tal y como
   // aparece en Hacienda. Sale en el pie, en el aviso legal y en la privacidad.
-  nombreLegal: '[PENDIENTE: NOMBRE LEGAL]',
+  // [PENDIENTE: NOMBRE LEGAL] provisional: cambiar por el nombre del DNI/NIE
+  // (autónomo) o el de la sociedad antes de poner legalCompleto: true.
+  nombreLegal: 'Relevo IA',
 
   // NIF o CIF del titular.
   nif: '[PENDIENTE: NIF]',
