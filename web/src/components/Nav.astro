@@ -133,7 +133,8 @@ const { isHome = false } = Astro.props;
   }
   @supports (backdrop-filter: blur(1px)) {
     .nav::before {
-      background: rgb(11 10 9 / 0.62);
+      /* Bastante opaco: el texto que pasa por debajo no compite con los enlaces. */
+      background: rgb(11 10 9 / 0.8);
       backdrop-filter: blur(14px) saturate(1.2);
       -webkit-backdrop-filter: blur(14px) saturate(1.2);
     }

@@ -602,7 +602,10 @@ const sectores = [
     width: max-content;
     max-width: none;
     margin: 0;
-    padding-inline: var(--gutter) clamp(6rem, 2rem + 10vw, 14rem);
+    /* Arranca alineada con el contenedor del resto de la web (en pantallas de
+       más de 1600 px el contenido no empieza en el borde). % = ancho del visor. */
+    padding-inline: max(var(--gutter), calc((100% - var(--container-max)) / 2 + var(--gutter)))
+      clamp(6rem, 2rem + 10vw, 14rem);
   }
   .is-pinned .sectors__intro {
     flex: none;
@@ -704,8 +707,7 @@ const sectores = [
 
   .is-pinned .sectors__foot {
     width: 100%;
-    max-width: none;
-    margin: 0;
+    margin: 0 auto;
     padding-block: var(--space-m);
   }
   .is-pinned .sectors__progress {
