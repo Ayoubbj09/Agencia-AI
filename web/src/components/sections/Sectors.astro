@@ -30,6 +30,7 @@ import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import WhatsAppButton from '../WhatsAppButton.astro';
 import PrivacyNote from '../PrivacyNote.astro';
+import { site } from '../../config/site';
 
 const imagenes = import.meta.glob<{ default: ImageMetadata }>(
   '../../assets/sectores/*.{webp,avif,jpg,jpeg,png}',
@@ -40,44 +41,59 @@ const fotoDe = (slug: string) =>
   Object.entries(imagenes).find(([path]) => path.split('/').pop()?.split('.')[0] === slug)?.[1]
     .default;
 
+/**
+ * Cada panel abre WhatsApp con un mensaje ya escrito para ese sector
+ * (mismo número que site.whatsappUrl).
+ */
+const whatsappSector = (negocio: string) =>
+  `${site.whatsappUrl.split('?')[0]}?text=${encodeURIComponent(
+    `Hola, tengo ${negocio} y quiero información sobre Relevo IA`,
+  )}`;
+
 const sectores = [
   {
     slug: 'inmobiliaria',
+    negocio: 'una inmobiliaria',
     name: 'Inmobiliarias',
     line: 'Responde dudas sobre tus pisos, filtra a los interesados y agenda visitas.',
     alt: 'Salón de un piso al atardecer, con unas llaves sobre la mesa y la ciudad iluminada al fondo.',
   },
   {
     slug: 'clinica',
+    negocio: 'una clínica',
     name: 'Clínicas',
     line: 'Resuelve dudas frecuentes, agenda citas y avisa a recepción cuando hace falta.',
     alt: 'Recepción tranquila de una clínica, con el mostrador iluminado, sillones y plantas.',
   },
   {
     slug: 'taller',
+    negocio: 'un taller',
     name: 'Talleres',
     line: 'Recoge qué le pasa al coche, da cita y avisa al taller.',
     alt: 'Taller mecánico de noche, con un coche en el elevador y las herramientas ordenadas.',
   },
   {
     slug: 'gimnasio',
+    negocio: 'un gimnasio',
     name: 'Gimnasios',
     line: 'Informa de tarifas y horarios y apunta a clases de prueba.',
     alt: 'Gimnasio vacío con mancuernas, bañado por la luz del atardecer.',
   },
   {
     slug: 'restaurante',
+    negocio: 'un restaurante',
     name: 'Restaurantes',
     line: 'Toma reservas y responde a preguntas frecuentes.',
     alt: 'Mesa para dos con una vela encendida y la cocina desenfocada al fondo.',
   },
   {
     slug: 'academia',
+    negocio: 'una academia',
     name: 'Academias',
     line: 'Informa de cursos y precios y agenda pruebas de nivel.',
     alt: 'Aula vacía con pupitres y pizarra, con luz de atardecer.',
   },
-].map((s) => ({ ...s, image: fotoDe(s.slug) }));
+].map((s) => ({ ...s, image: fotoDe(s.slug), href: whatsappSector(s.negocio) }));
 ---
 
 <section id="sectores" class="sectors section" aria-labelledby="sectores-title">
@@ -107,9 +123,15 @@ const sectores = [
               <li
                 class:list={['sector', s.image ? 'sector--photo' : 'sector--type']}
                 data-sector={s.slug}
-                data-cursor={s.image ? 'Ver' : undefined}
               >
-                <div class="sector__card">
+                <a
+                  class="sector__card"
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${s.name}: escríbenos por WhatsApp (se abre en una pestaña nueva)`}
+                  data-cursor="Escribir"
+                >
                   <h3 class="sector__name" data-sector-name>
                     <span class="sector__name-mask">
                       <span class="sector__name-inner" data-sector-name-inner>
@@ -149,7 +171,7 @@ const sectores = [
                     </span>
                     <span class="sector__line">{s.line}</span>
                   </p>
-                </div>
+                </a>
               </li>
             ))
           }
@@ -214,6 +236,8 @@ const sectores = [
   }
 
   .sector__card {
+    color: inherit;
+    text-decoration: none;
     display: grid;
     grid-template-areas: 'frame' 'name' 'meta';
     align-content: start;
@@ -271,6 +295,12 @@ const sectores = [
     gap: var(--space-xs);
     color: var(--text-muted);
     max-width: 34ch;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  /* El panel abre WhatsApp: al pasar o enfocar, la línea de ejemplo se aclara. */
+  .sector__card:hover .sector__meta,
+  .sector__card:focus-visible .sector__meta {
+    color: var(--text);
   }
   .sector__index {
     flex: none;

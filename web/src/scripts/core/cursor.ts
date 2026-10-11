@@ -6,7 +6,7 @@
  *  - Un punto naranja que sigue al ratón (gsap.quickTo, solo transform).
  *  - Sobre enlaces/botones crece (.is-hover).
  *  - Con data-cursor="Texto" se convierte en un disco claro con esa etiqueta
- *    (p. ej. "Escribir" en WhatsApp, "Ver" en los paneles de sectores).
+ *    (p. ej. "Escribir" en WhatsApp, "Escribir" en los paneles de sectores, que abren WhatsApp).
  *  - data-cursor="none" → oculta el cursor propio sobre ese elemento.
  *  - El cursor nativo solo se oculta cuando el propio ya está visible, y nunca
  *    en campos de texto (global.css). En táctil no existe.
