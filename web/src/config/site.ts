@@ -50,7 +50,7 @@ export const site: SiteConfig = {
   correo: 'boujlikhayoub1@gmail.com',
 
   // Teléfono de contacto (puede ser el mismo que el de WhatsApp).
-  telefono: '[PENDIENTE: TELÉFONO]',
+  telefono: '+34 613 657 130',
 
   // Número de WhatsApp tal y como se enseña en la web.
   whatsapp: '+34 613 657 130',
