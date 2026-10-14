@@ -64,7 +64,7 @@ export const site: SiteConfig = {
   // [PENDIENTE: DOMINIO] cambiar por el dominio definitivo
   // Dirección completa de la web, con https:// y sin barra al final.
   // Se usa para la URL canónica, Open Graph, el sitemap y los datos estructurados.
-  dominio: 'https://relevo-ia-delta.vercel.app',
+  dominio: 'https://ahlan-ia.vercel.app',
 
   // Ponlo en true SOLO cuando hayas rellenado todos los datos legales de arriba
   // (nombre legal, NIF, dirección y correo) y revisado los textos legales.
