@@ -3,7 +3,7 @@
  * Pie (spec §7.8) — PROPIETARIO: Sección D. Animación: src/scripts/sections/footer.ts
  *
  *  - Logotipo, frase corta, índice, WhatsApp y correo, enlaces legales.
- *  - "© {año} Relevo IA · {nombreLegal}": el año sale del build y main.ts lo
+ *  - "© {año} Ahlan IA": el año sale del build y main.ts lo
  *    actualiza en el navegador ([data-current-year]).
  *  - Marca gigante final ([data-footer-wordmark]): decorativa (aria-hidden), ya
  *    partida en letras en el marcado para revelarlas al llegar al final. Sin JS
@@ -15,7 +15,7 @@ import SiteValue from './SiteValue.astro';
 import WhatsAppIcon from './WhatsAppIcon.astro';
 
 const isHome = Astro.url.pathname === '/';
-const word = Array.from('Relevo');
+const word = Array.from('Ahlan');
 const ia = Array.from('IA');
 ---
 
@@ -23,7 +23,7 @@ const ia = Array.from('IA');
   <div class="footer__top container">
     <div class="footer__brand" data-reveal>
       {/* Mismo patrón que la nav: el nombre accesible es el del logotipo
-          ("Relevo IA", role="img"), igual al texto visible. */}
+          ("Ahlan IA", role="img"), igual al texto visible. */}
       <a class="footer__logo" href="/" data-cursor-hover>
         <Logo size="1.75rem" />
       </a>
@@ -81,7 +81,7 @@ const ia = Array.from('IA');
 
   <div class="footer__bottom container">
     <p class="footer__copy">
-      © <span data-current-year>{currentYear}</span> Relevo IA · <SiteValue value={site.nombreLegal} />
+      © <span data-current-year>{currentYear}</span> Ahlan IA
     </p>
     <p class="footer__note">Sin cookies ni rastreadores.</p>
     <a class="link footer__up" href="#main">

@@ -1,7 +1,7 @@
 /**
  * 7.8 Pie — animación ([data-footer]). PROPIETARIO: Sección D.
  *
- * Marca gigante "Relevo·IA" que se revela al llegar al final de la página:
+ * Marca gigante "Ahlan·IA" que se revela al llegar al final de la página:
  *   desktop → las letras suben desde su máscara ligadas al scroll (scrub 0.8,
  *             ease 'none') mientras la marca entra en pantalla; al tocar fondo,
  *             el testigo naranja aparece con un acento expo.out (el "relevo").

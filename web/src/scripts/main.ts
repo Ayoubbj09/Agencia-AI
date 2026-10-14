@@ -200,7 +200,7 @@ function initSection([selector, init, name]: (typeof SECTIONS)[number]): void {
     init(ctx);
   } catch (err) {
     // Una sección rota no puede dejar contenido oculto ni bloquear al resto.
-    console.error(`[relevo] La sección "${name}" falló al iniciar:`, err);
+    console.error(`[ahlan] La sección "${name}" falló al iniciar:`, err);
     showAll(root);
   }
 }

@@ -109,7 +109,7 @@ export function init(ctx: SectionContext): void {
         cleanup = mode === 'desktop' ? buildDesktop() : buildTouch();
       } catch (err) {
         // Nunca dejar la conversación oculta: vuelta a la versión estática.
-        console.error('[relevo] 7.3 no pudo iniciar la animación:', err);
+        console.error('[ahlan] 7.3 no pudo iniciar la animación:', err);
         root.classList.remove('is-live', 'is-pinned');
         gsap.set(animated, { clearProps: 'all' });
       }

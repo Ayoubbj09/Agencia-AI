@@ -34,8 +34,8 @@ function markSvg({ rounded = true, padding = 0 } = {}) {
   const s = 64 + padding * 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-padding} ${-padding} ${s} ${s}" width="${s}" height="${s}">
   <rect x="${-padding}" y="${-padding}" width="${s}" height="${s}" ${rounded ? 'rx="14"' : ''} fill="${BG}"/>
-  <path d="M19 49V15h12.5a9.25 9.25 0 0 1 0 18.5H19M30 33.5L39.5 49" fill="none" stroke="${TEXT}" stroke-width="7"/>
-  <circle cx="46.8" cy="45.6" r="4.6" fill="${ACCENT}"/>
+  <path d="M14 49L28.5 15L43 49M19.6 38h17.8" fill="none" stroke="${TEXT}" stroke-width="7"/>
+  <circle cx="50.4" cy="45.6" r="4.6" fill="${ACCENT}"/>
 </svg>
 `;
 }
@@ -111,8 +111,8 @@ await writeFile(
   pub('site.webmanifest'),
   JSON.stringify(
     {
-      name: 'Relevo IA',
-      short_name: 'Relevo IA',
+      name: 'Ahlan IA',
+      short_name: 'Ahlan IA',
       start_url: '/',
       display: 'browser',
       background_color: BG,

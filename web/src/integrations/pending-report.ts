@@ -172,7 +172,7 @@ function report(
 export default function pendingReport(): AstroIntegration {
   let root = process.cwd();
   return {
-    name: 'relevo-pending-report',
+    name: 'ahlan-pending-report',
     hooks: {
       'astro:config:done': ({ config }) => {
         root = fileURLToPath(config.root);

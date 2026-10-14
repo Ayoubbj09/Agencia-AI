@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  CONFIGURACIÓN DE LA WEB DE RELEVO IA
+ *  CONFIGURACIÓN DE LA WEB DE AHLAN IA
  * ============================================================================
  *
  *  Este es el ÚNICO archivo que tienes que tocar para cambiar los datos de la
@@ -31,14 +31,14 @@ export interface SiteConfig {
 }
 
 export const site: SiteConfig = {
-  // Nombre con el que se conoce la marca. Úsalo siempre completo: "Relevo IA".
-  nombreComercial: 'Relevo IA',
+  // Nombre con el que se conoce la marca. Úsalo siempre completo: "Ahlan IA".
+  nombreComercial: 'Ahlan IA',
 
   // Nombre de la persona o empresa titular (autónomo o sociedad), tal y como
   // aparece en Hacienda. Sale en el pie, en el aviso legal y en la privacidad.
   // [PENDIENTE: NOMBRE LEGAL] provisional: cambiar por el nombre del DNI/NIE
   // (autónomo) o el de la sociedad antes de poner legalCompleto: true.
-  nombreLegal: 'Relevo IA',
+  nombreLegal: 'Ahlan IA',
 
   // NIF o CIF del titular.
   nif: '[PENDIENTE: NIF]',
@@ -59,7 +59,7 @@ export const site: SiteConfig = {
   // Si cambias el número de arriba, cambia también los dígitos de aquí
   // (34 + número, sin espacios ni el signo +).
   whatsappUrl:
-    'https://wa.me/34613657130?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Relevo%20IA',
+    'https://wa.me/34613657130?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Ahlan%20IA',
 
   // [PENDIENTE: DOMINIO] cambiar por el dominio definitivo
   // Dirección completa de la web, con https:// y sin barra al final.
@@ -142,11 +142,11 @@ export function navHref(id: string, isHome: boolean): string {
 
 /** Textos SEO por defecto. */
 export const seo = {
-  titleHome: 'Relevo IA · Agentes de IA para WhatsApp',
+  titleHome: 'Ahlan IA · Agentes de IA para WhatsApp',
   description:
     'Diseñamos, montamos y mantenemos agentes de IA que atienden a tus clientes por WhatsApp, los cualifican, agendan citas y avisan a tu equipo cuando hace falta.',
   ogImage: '/og.png',
-  ogImageAlt: 'Relevo IA · Agentes de IA para WhatsApp',
+  ogImageAlt: 'Ahlan IA · Agentes de IA para WhatsApp',
   themeColor: '#0B0A09',
   locale: 'es_ES',
 } as const;

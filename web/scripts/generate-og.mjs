@@ -391,7 +391,7 @@ export function woff2ToSfnt(input) {
 /* ─── Fuentes temporales + fontconfig ───────────────────────────────────── */
 
 function prepareFonts() {
-  const dir = mkdtempSync(join(tmpdir(), 'relevo-og-'));
+  const dir = mkdtempSync(join(tmpdir(), 'ahlan-og-'));
   for (const spec of FONT_FILES) {
     const src = require.resolve(spec);
     const name = spec.split('/').pop().replace(/\.woff2?$/, '.ttf');
@@ -427,14 +427,14 @@ async function inkBox(sharp, fragment) {
 }
 
 async function compose(sharp) {
-  // Logotipo: "Relevo" (Inter Tight 600, tracking -0.045em) + testigo naranja + "IA"
+  // Logotipo: "Ahlan" (Inter Tight 600, tracking -0.045em) + testigo naranja + "IA"
   // (Instrument Serif cursiva), como src/components/Logo.astro.
   const logoSize = 196;
   const logoBaseline = H - PAD - 6;
-  const relevo = `<text x="${PAD - 6}" y="${logoBaseline}" font-family="${FAMILY_SANS}" font-weight="600" font-size="${logoSize}" letter-spacing="${(-0.045 * logoSize).toFixed(2)}" fill="${C.text}">Relevo</text>`;
-  const relevoBox = await inkBox(sharp, relevo);
+  const marca = `<text x="${PAD - 6}" y="${logoBaseline}" font-family="${FAMILY_SANS}" font-weight="600" font-size="${logoSize}" letter-spacing="${(-0.045 * logoSize).toFixed(2)}" fill="${C.text}">Ahlan</text>`;
+  const marcaBox = await inkBox(sharp, marca);
   const dotR = (0.2 * logoSize) / 2;
-  const dotCx = relevoBox.right + 0.012 * logoSize + dotR;
+  const dotCx = marcaBox.right + 0.012 * logoSize + dotR;
   const dotCy = logoBaseline - 0.17 * logoSize - dotR;
   const iaX = dotCx + dotR + 0.13 * logoSize;
   const ia = `<text x="${iaX.toFixed(1)}" y="${logoBaseline}" font-family="${FAMILY_SERIF}" font-style="italic" font-size="${(logoSize * 1.08).toFixed(1)}" letter-spacing="${(0.01 * logoSize).toFixed(2)}" fill="${C.text}">IA</text>`;
@@ -469,7 +469,7 @@ async function compose(sharp) {
 
   <line x1="${PAD}" y1="${logoBaseline - logoSize * 0.98}" x2="${W - PAD}" y2="${logoBaseline - logoSize * 0.98}" stroke="${C.line}" stroke-width="1"/>
 
-  ${relevo}
+  ${marca}
   <circle cx="${dotCx.toFixed(1)}" cy="${dotCy.toFixed(1)}" r="${dotR.toFixed(1)}" fill="${C.accent}"/>
   ${ia}
 </svg>`;
@@ -496,8 +496,8 @@ async function checkFonts(sharp) {
   }
   // Mismos atributos en las dos familias: si falta una, fontconfig la sustituye
   // por la otra y los dos dibujos coinciden.
-  const a = await inkBox(sharp, sample(FAMILY_SANS, 'font-style="italic"', 'Relevo'));
-  const b = await inkBox(sharp, sample(FAMILY_SERIF, 'font-style="italic"', 'Relevo'));
+  const a = await inkBox(sharp, sample(FAMILY_SANS, 'font-style="italic"', 'Ahlan'));
+  const b = await inkBox(sharp, sample(FAMILY_SERIF, 'font-style="italic"', 'Ahlan'));
   if (a.width === b.width && a.height === b.height) {
     throw new Error('Inter Tight e Instrument Serif se dibujan igual: solo se ha cargado una fuente');
   }

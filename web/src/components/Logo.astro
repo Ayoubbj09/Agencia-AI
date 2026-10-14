@@ -1,13 +1,13 @@
 ---
 /**
- * Logotipo tipográfico "Relevo IA".
+ * Logotipo tipográfico "Ahlan IA".
  *
- *  Relevo  →  Inter Tight, peso 600, tracking cerrado.
- *  ●       →  el "testigo": un punto naranja que toca la "o" final. Al pasar el
+ *  Ahlan   →  Inter Tight, peso 600, tracking cerrado.
+ *  ●       →  el "testigo": un punto naranja que toca la "n" final. Al pasar el
  *             ratón por el enlace que lo contiene, viaja hasta "IA" (el relevo).
  *  IA      →  Instrument Serif cursiva: siempre visible, solo cambia la voz.
  *
- * Accesible: role="img" + aria-label="Relevo IA" (el lector no deletrea las
+ * Accesible: role="img" + aria-label="Ahlan IA" (el lector no deletrea las
  * piezas). Con `decorative` se oculta a lectores (p. ej. la marca gigante del pie).
  * El tamaño sale de `font-size` (prop `size` o heredado): todo va en em.
  */
@@ -23,9 +23,9 @@ const { size, decorative = false, class: className } = Astro.props;
 <span
   class:list={['logo', className]}
   style={size ? `--logo-size: ${size}` : undefined}
-  {...decorative ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': 'Relevo IA' }}
+  {...decorative ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': 'Ahlan IA' }}
 >
-  <span class="logo__word" aria-hidden="true">Relevo</span><span
+  <span class="logo__word" aria-hidden="true">Ahlan</span><span
     class="logo__baton"
     aria-hidden="true"></span><span class="logo__ia" aria-hidden="true">IA</span>
 </span>
@@ -46,7 +46,7 @@ const { size, decorative = false, class: className } = Astro.props;
     font-weight: 600;
     letter-spacing: -0.045em;
   }
-  /* El testigo: toca el lateral de la "o" a media altura de x. */
+  /* El testigo: toca el lateral de la "n" a media altura de x. */
   .logo__baton {
     display: inline-block;
     inline-size: 0.2em;
@@ -64,7 +64,7 @@ const { size, decorative = false, class: className } = Astro.props;
     font-size: 1.08em;
     letter-spacing: 0.01em;
   }
-  /* El relevo: el punto pasa de "Relevo" a "IA" al hacer hover/foco en el enlace. */
+  /* El relevo: el punto pasa de "Ahlan" a "IA" al hacer hover/foco en el enlace. */
   :global(a:hover) > .logo .logo__baton,
   :global(a:focus-visible) > .logo .logo__baton {
     transform: translate3d(0.22em, -0.17em, 0);
