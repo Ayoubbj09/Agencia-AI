@@ -1,0 +1,251 @@
+---
+/**
+ * Pie (spec §7.8) — PROPIETARIO: Sección D. Animación: src/scripts/sections/footer.ts
+ *
+ *  - Logotipo, frase corta, índice, WhatsApp y correo, enlaces legales.
+ *  - "© {año} Al Madina": el año sale del build y main.ts lo
+ *    actualiza en el navegador ([data-current-year]).
+ *  - Marca gigante final ([data-footer-wordmark]): decorativa (aria-hidden), ya
+ *    partida en letras en el marcado para revelarlas al llegar al final. Sin JS
+ *    o con reduced motion se ve entera desde el principio.
+ */
+import { site, currentYear, navLinks, navHref } from '../config/site';
+import Logo from './Logo.astro';
+import SiteValue from './SiteValue.astro';
+import Icon from './Icon.astro';
+import { toTelHref } from '../config/site';
+
+const isHome = Astro.url.pathname === '/';
+const word = Array.from('Al Madina').map((c) => (c === ' ' ? '\u00a0' : c));
+---
+
+<footer class="footer" id="pie" data-footer>
+  <div class="footer__top container">
+    <div class="footer__brand" data-reveal>
+      {/* Mismo patrón que la nav: el nombre accesible es el del logotipo
+          ("Al Madina", role="img"), igual al texto visible. */}
+      <a class="footer__logo" href="/" data-cursor-hover>
+        <Logo size="1.75rem" />
+      </a>
+      <p class="footer__claim">
+        Restaurante marroquí y fast food en Salt.<br />
+        {site.lema}
+      </p>
+    </div>
+
+    <div class="footer__cols" data-reveal-group="0.1">
+      <nav class="footer__col" aria-labelledby="pie-indice" data-reveal>
+        <h2 class="footer__heading" id="pie-indice">Índice</h2>
+        <ul role="list">
+          {
+            navLinks.map((l) => (
+              <li>
+                <a class="link" href={navHref(l.id, isHome)}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__col" data-reveal>
+        <h2 class="footer__heading">Contacto</h2>
+        <ul role="list">
+          <li>
+            <a class="link footer__wa" href={toTelHref(site.telefono)} data-cursor="Llamar">
+              <Icon name="phone" />
+              <span class="nowrap">{site.telefono}</span>
+            </a>
+          </li>
+          <li>{site.direccion}<br />{site.codigoPostal} {site.ciudad}</li>
+          <li>
+            <a class="link footer__wa" href={site.instagram} target="_blank" rel="noopener noreferrer">
+              <Icon name="instagram" /> Instagram<span class="sr-only"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+          <li>
+            <a class="link footer__wa" href={site.tiktok} target="_blank" rel="noopener noreferrer">
+              <Icon name="tiktok" /> TikTok<span class="sr-only"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer__col" data-reveal>
+        <h2 class="footer__heading">Legal</h2>
+        <ul role="list">
+          <li><a class="link" href="/aviso-legal">Aviso legal</a></li>
+          <li><a class="link" href="/privacidad">Política de privacidad</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__bottom container">
+    <p class="footer__copy">
+      © <span data-current-year>{currentYear}</span> Al Madina
+    </p>
+    <p class="footer__note">Sin cookies ni rastreadores.</p>
+    <a class="link footer__up" href="#main">
+      Volver arriba <span class="footer__up-arrow" aria-hidden="true">↑</span>
+    </a>
+  </div>
+
+  <div class="footer__wordmark container" data-footer-wordmark aria-hidden="true">
+    <span class="footer__wordmark-inner">
+      <span class="footer__wordmark-clip">
+        {word.map((c) => <span class="footer__wm-ch" data-wm-ch>{c}</span>)}<span
+          class="footer__wordmark-dot"><span class="footer__wordmark-baton" data-wm-dot></span></span><span class="footer__wm-ch footer__wm-ar" data-wm-ch lang="ar" dir="rtl">{site.nombreArabe}</span>
+      </span>
+    </span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-2xl);
+    overflow: clip;
+  }
+  .footer__top {
+    display: grid;
+    gap: var(--space-xl);
+  }
+  @media (min-width: 64em) {
+    .footer__top {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+      align-items: start;
+    }
+  }
+  .footer__logo {
+    display: inline-block;
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+  }
+  .footer__claim {
+    margin-top: var(--space-m);
+    font-size: var(--fs-lg);
+    line-height: 1.4;
+    color: var(--text-muted);
+    max-width: 30ch;
+  }
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--space-l) var(--space-m);
+  }
+  .footer__heading {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-caps);
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-s);
+  }
+  .footer__col ul {
+    display: grid;
+    gap: 0.65rem;
+    font-size: var(--fs-base);
+    justify-items: start;
+  }
+  .footer__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .footer__bottom {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-l);
+    margin-top: var(--space-xl);
+    padding-block: var(--space-m);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  /* Filete alineado con el texto (no con el borde del contenedor). */
+  .footer__bottom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--gutter);
+    right: var(--gutter);
+    height: 1px;
+    background: var(--line);
+  }
+  .footer__copy {
+    margin-right: auto;
+  }
+  .footer__up {
+    color: var(--text);
+  }
+  .footer__up-arrow {
+    display: inline-block;
+    margin-left: 0.25em;
+    transition: translate 0.6s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .footer__up:hover .footer__up-arrow {
+      translate: 0 -0.25em;
+    }
+  }
+
+  /* ── Marca gigante ──────────────────────────────────────────────────────
+     Ocupa el ancho del contenedor (≈ 3,64 em de texto + el vuelo de la cursiva). Cada letra es un
+     inline-block que footer.ts sube desde debajo de la máscara. */
+  .footer__wordmark {
+    container-type: inline-size; /* 100cqi = ancho útil del contenedor */
+    padding-block: var(--space-l) var(--space-m);
+    user-select: none;
+  }
+  .footer__wordmark-inner {
+    display: block;
+    font-size: min(calc((100vw - 2 * var(--gutter)) / 8.2), 25rem); /* reserva */
+    font-size: calc(100cqi / 8.2);
+    font-weight: 750;
+    letter-spacing: -0.06em;
+    line-height: 0.82;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  /* Máscara vertical: padding para no cortar la cursiva ni la tilde de nada,
+     compensado con margen negativo (no mueve el diseño). En horizontal no
+     recorta (la "A" cursiva sobresale un poco a la derecha). */
+  .footer__wordmark-clip {
+    display: block;
+    overflow-x: visible;
+    overflow-y: clip;
+    padding-block: 0.14em 0.08em;
+    margin-block: -0.14em -0.02em;
+  }
+  .footer__wm-ch {
+    display: inline-block;
+  }
+  /* El hueco del testigo (posición fija) y el testigo (lo anima footer.ts). */
+  .footer__wordmark-dot {
+    display: inline-block;
+    inline-size: 0.16em;
+    block-size: 0.16em;
+    margin-inline: 0.02em 0.1em;
+    translate: 0 -0.16em;
+  }
+  .footer__wordmark-baton {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .footer__wm-ar {
+    font-family: var(--font-arabic);
+    font-weight: 500;
+    font-size: 0.82em;
+    color: var(--accent);
+    padding-inline-start: 0.06em;
+  }
+</style>

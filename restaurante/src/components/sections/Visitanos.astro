@@ -1,0 +1,174 @@
+---
+/** Visítanos (#visitanos): dirección, horario, teléfono y redes. */
+import { site, toTelHref } from '../../config/site';
+import SiteValue from '../SiteValue.astro';
+import Icon from '../Icon.astro';
+import CallButton from '../CallButton.astro';
+import Zellige from '../Zellige.astro';
+---
+
+<section id="visitanos" class="visita section" aria-labelledby="visitanos-title">
+  <div class="container">
+    <p class="eyebrow" data-reveal>Visítanos</p>
+    <h2 id="visitanos-title" class="visita__title" data-reveal="split">
+      Te <em>esperamos</em>.
+    </h2>
+
+    <div class="visita__grid">
+      <div class="visita__card visita__card--main" data-reveal>
+        <div class="visita__deco" aria-hidden="true"><Zellige /></div>
+        <Icon name="pin" size="1.75rem" class="visita__icon" />
+        <p class="visita__label">Dirección</p>
+        <p class="visita__big">{site.direccion}</p>
+        <p class="visita__muted">{site.codigoPostal} {site.ciudad}</p>
+        <a class="btn btn--ghost visita__btn" href={site.mapsUrl} target="_blank" rel="noopener noreferrer" data-cursor="Ir">
+          <span class="btn__inner">Cómo llegar <Icon name="arrow" /></span>
+          <span class="sr-only"> (se abre Google Maps en una pestaña nueva)</span>
+        </a>
+      </div>
+
+      <div class="visita__card" data-reveal>
+        <Icon name="clock" size="1.75rem" class="visita__icon" />
+        <p class="visita__label">Horario</p>
+        <p class="visita__mid">{site.horario}</p>
+        <p class="visita__muted visita__small"><SiteValue value={site.horarioDetalle} /></p>
+      </div>
+
+      <div class="visita__card" data-reveal>
+        <Icon name="phone" size="1.75rem" class="visita__icon" />
+        <p class="visita__label">Teléfono</p>
+        <p class="visita__mid">
+          <a class="link link--underlined" href={toTelHref(site.telefono)}>{site.telefono}</a>
+        </p>
+        <div class="visita__call">
+          <CallButton size="sm" label="Llamar ahora" magnetic={0.3} />
+        </div>
+      </div>
+
+      <div class="visita__card" data-reveal>
+        <p class="visita__label">Síguenos</p>
+        <ul class="visita__social" role="list">
+          <li>
+            <a class="link visita__social-link" href={site.instagram} target="_blank" rel="noopener noreferrer">
+              <Icon name="instagram" size="1.4rem" /> Instagram<span class="sr-only"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+          <li>
+            <a class="link visita__social-link" href={site.tiktok} target="_blank" rel="noopener noreferrer">
+              <Icon name="tiktok" size="1.4rem" /> TikTok<span class="sr-only"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+        </ul>
+        <p class="visita__muted visita__handle">@almadina_fastfood_</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .visita__title {
+    margin-block-start: var(--space-s);
+    font-size: clamp(3rem, 1rem + 8vw, 9rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.92;
+  }
+  .visita__title :global(em) {
+    color: var(--accent);
+  }
+  .visita__grid {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+  }
+  @media (min-width: 900px) {
+    .visita__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .visita__card--main {
+      grid-row: span 2;
+    }
+  }
+  .visita__card {
+    padding: var(--space-l);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+  }
+  .visita__card--main {
+    background: radial-gradient(120% 90% at 100% 0%, var(--accent-glow), transparent 60%), var(--bg-elev);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    display: flex;
+    flex-direction: column;
+  }
+  .visita__card :global(.visita__icon) {
+    color: var(--accent);
+  }
+  .visita__label {
+    margin-block-start: var(--space-s);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .visita__big {
+    margin-block-start: var(--space-xs);
+    font-size: clamp(1.75rem, 1rem + 2.6vw, 3rem);
+    font-weight: var(--fw-bold);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+  .visita__mid {
+    margin-block-start: var(--space-xs);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+  }
+  .visita__muted {
+    margin-block-start: var(--space-2xs);
+    color: var(--text-muted);
+  }
+  .visita__btn {
+    margin-block-start: auto;
+    align-self: flex-start;
+  }
+  .visita__card--main .visita__muted {
+    margin-block-end: var(--space-l);
+  }
+  .visita__small {
+    font-size: var(--fs-sm);
+  }
+  .visita__card--main {
+    position: relative;
+    overflow: clip;
+  }
+  .visita__card--main > :not(.visita__deco) {
+    position: relative;
+  }
+  .visita__deco {
+    position: absolute;
+    inline-size: 26rem;
+    inset-inline-end: -9rem;
+    inset-block-end: -9rem;
+    opacity: 0.22;
+  }
+  .visita__call {
+    margin-block-start: var(--space-m);
+  }
+  .visita__social {
+    display: grid;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-xs);
+    padding: 0;
+    list-style: none;
+  }
+  .visita__social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+  }
+  .visita__handle {
+    font-size: var(--fs-sm);
+  }
+</style>

@@ -1,0 +1,103 @@
+---
+/**
+ * 404 — PROPIETARIO: Sección D. Mismo estilo que la web y enlace a la home.
+ * Siempre noindex (prop `noindex` de Base). El "404" gigante es decorativo.
+ */
+import Base from '../layouts/Base.astro';
+import CallButton from '../components/CallButton.astro';
+---
+
+<Base title="Página no encontrada" path="/404" noindex description="Esta página no existe o ha cambiado de sitio.">
+  <section class="notfound container" aria-labelledby="notfound-title">
+    <span class="notfound__code" aria-hidden="true" data-reveal="fade">404</span>
+
+    <div class="notfound__content">
+      <p class="eyebrow" data-reveal>Error 404</p>
+      <h1 class="notfound__title" id="notfound-title" data-reveal="split">
+        Este plato no está en la <em>carta</em>.
+      </h1>
+      <p class="lead notfound__lead" data-reveal>
+        La página que buscas no existe o ha cambiado de sitio. Vuelve al inicio o llámanos y te
+        ayudamos.
+      </p>
+      <div class="notfound__actions" data-reveal-group="0.1">
+        <div data-reveal>
+          <a class="btn btn--primary btn--lg" href="/" data-magnetic="0.3">
+            <span class="btn__inner" data-magnetic-inner>
+              <span aria-hidden="true">←</span> Volver al inicio
+            </span>
+          </a>
+        </div>
+        <div data-reveal>
+          <CallButton variant="ghost" size="lg" label="Llamar" />
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    position: relative;
+    display: grid;
+    align-content: center;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: calc(var(--nav-h) + var(--space-l));
+    padding-bottom: var(--space-2xl);
+    isolation: isolate;
+  }
+  /* "404" gigante en contorno, detrás del texto. */
+  .notfound__code {
+    position: absolute;
+    right: var(--gutter);
+    top: 50%;
+    z-index: var(--z-below);
+    margin-top: -0.5em;
+    font-size: clamp(9rem, 2rem + 30vw, 34rem);
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.07em;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+    user-select: none;
+    pointer-events: none;
+  }
+  @media (max-width: 47.99em) {
+    .notfound__code {
+      top: calc(var(--nav-h) + var(--space-s));
+      margin-top: 0;
+      right: calc(var(--gutter) - 0.04em);
+    }
+  }
+  .notfound__content {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-m);
+  }
+  .notfound__title {
+    font-size: clamp(3rem, 0.9rem + 8.6vw, 10.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+    max-width: 11ch;
+  }
+  .notfound__title em {
+    color: var(--accent);
+  }
+  .notfound__lead {
+    max-width: 38ch;
+  }
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-xs);
+  }
+  @media (max-width: 26em) {
+    .notfound__actions,
+    .notfound__actions > div,
+    .notfound__actions :global(.btn) {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,220 @@
+---
+/**
+ * Carta (#carta). Datos en src/data/carta.ts. Animación: scripts/sections/carta.ts
+ * Sin JS: todas las categorías una debajo de otra. Con JS: pestañas accesibles
+ * (role="tablist") y los platos entran escalonados al cambiar de pestaña.
+ */
+import { carta, cartaDeEjemplo } from '../../data/carta';
+import { site } from '../../config/site';
+---
+
+<section id="carta" class="carta section" aria-labelledby="carta-title" data-carta>
+  <div class="container">
+    <header class="carta__head">
+      <p class="eyebrow" data-reveal>La carta</p>
+      <h2 id="carta-title" class="carta__title" data-reveal="split">
+        Hecho para <em>compartir</em>. O no.
+      </h2>
+      {
+        cartaDeEjemplo && (
+          <p class="carta__sample" data-reveal>
+            <span class="pending">Carta de ejemplo</span> Pendiente de la carta real del restaurante:
+            platos y precios orientativos.
+          </p>
+        )
+      }
+    </header>
+
+    <div class="carta__tabs" role="tablist" aria-label="Categorías de la carta" data-carta-tabs hidden>
+      {
+        carta.map((c, i) => (
+          <button
+            class="carta__tab"
+            type="button"
+            role="tab"
+            id={`tab-${c.id}`}
+            aria-controls={`panel-${c.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            data-carta-tab
+          >
+            {c.nombre}
+          </button>
+        ))
+      }
+      <span class="carta__indicator" aria-hidden="true" data-carta-indicator></span>
+    </div>
+
+    <div class="carta__panels">
+      {
+        carta.map((c) => (
+          <section
+            class="carta__panel"
+            id={`panel-${c.id}`}
+            role="tabpanel"
+            aria-labelledby={`tab-${c.id}`}
+            data-carta-panel
+          >
+            <h3 class="carta__cat" data-carta-cat>{c.nombre}</h3>
+            <ul class="carta__list" role="list">
+              {c.platos.map((p) => (
+                <li class="plato" data-plato>
+                  <div class="plato__row">
+                    <span class="plato__name">{p.nombre}</span>
+                    {p.precio && <span class="plato__dots" aria-hidden="true" />}
+                    {p.precio && <span class="plato__price">{p.precio}</span>}
+                  </div>
+                  <p class="plato__desc">{p.descripcion}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+
+    <p class="carta__foot" data-reveal>
+      Precio medio por persona: <strong>{site.precioPersona}</strong> · Pregunta por alérgenos al hacer tu pedido.
+    </p>
+  </div>
+</section>
+
+<style>
+  .carta__head {
+    max-inline-size: 60rem;
+  }
+  .carta__title {
+    margin-block-start: var(--space-s);
+    font-size: clamp(2.5rem, 1rem + 5.6vw, 6.5rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.95;
+  }
+  .carta__title :global(em) {
+    color: var(--accent);
+  }
+  .carta__sample {
+    margin-block-start: var(--space-m);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  .carta__sample .pending {
+    margin-inline-end: 0.5em;
+  }
+
+  /* Pestañas (solo con JS: el atributo hidden se quita en carta.ts). */
+  .carta__tabs {
+    position: relative;
+    display: flex;
+    gap: var(--space-2xs);
+    margin-block-start: var(--space-l);
+    padding: 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .carta__tabs[hidden] {
+    display: none;
+  }
+  .carta__tab {
+    position: relative;
+    z-index: var(--z-raised);
+    flex: none;
+    border: 0;
+    background: none;
+    color: var(--text-soft);
+    font: inherit;
+    font-weight: var(--fw-medium);
+    padding: 0.7em 1.2em;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .carta__tab[aria-selected='true'] {
+    color: var(--on-accent);
+  }
+  .carta__indicator {
+    position: absolute;
+    inset-block: 0.35rem;
+    inset-inline-start: 0;
+    inline-size: 0;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+  }
+
+  .carta__panels {
+    margin-block-start: var(--space-l);
+    display: grid;
+    gap: var(--space-xl);
+  }
+  :global(html.js) .carta__panels.is-tabs {
+    gap: 0;
+  }
+  .carta__panel[hidden] {
+    display: none;
+  }
+  .carta__cat {
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-semibold);
+    margin-block-end: var(--space-m);
+    color: var(--accent);
+  }
+  :global(.is-tabs) .carta__cat {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .carta__list {
+    display: grid;
+    gap: var(--space-m) var(--space-xl);
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 900px) {
+    .carta__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .plato {
+    padding-block: var(--space-s);
+    border-block-end: 1px solid var(--line);
+  }
+  .plato__row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+  }
+  .plato__name {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.02em;
+  }
+  .plato__dots {
+    flex: 1;
+    border-block-end: 2px dotted var(--line-strong);
+    translate: 0 -0.3em;
+  }
+  .plato__price {
+    font-weight: var(--fw-semibold);
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .plato__desc {
+    margin-block-start: var(--space-3xs);
+    color: var(--text-muted);
+    max-inline-size: 48ch;
+  }
+  .carta__foot {
+    margin-block-start: var(--space-l);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+  .carta__foot strong {
+    color: var(--text);
+  }
+</style>

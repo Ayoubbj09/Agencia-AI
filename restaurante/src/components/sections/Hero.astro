@@ -1,0 +1,190 @@
+---
+/**
+ * Hero (#inicio). Animación: src/scripts/sections/hero.ts
+ * Titular con el lema del propio restaurante, rosetón de zellige (SVG) que
+ * gira despacio y reacciona al scroll, y la nota de Google.
+ */
+import { site } from '../../config/site';
+import CallButton from '../CallButton.astro';
+import Zellige from '../Zellige.astro';
+import Icon from '../Icon.astro';
+---
+
+<section id="inicio" class="hero" aria-labelledby="inicio-title">
+  <div class="hero__visual" aria-hidden="true">
+    <div class="hero__glow"></div>
+    <div class="hero__rosette" data-hero-rosette>
+      <Zellige />
+    </div>
+    <p class="hero__arabic" data-hero-arabic lang="ar" dir="rtl">{site.nombreArabe}</p>
+  </div>
+
+  <div class="hero__inner container">
+    <p class="eyebrow hero__eyebrow" data-reveal>
+      Restaurante marroquí · Fast food · {site.ciudad}
+    </p>
+    <h1 id="inicio-title" class="hero__title" data-hero-title>
+      Saldrás con una <em>sonrisa</em>.
+    </h1>
+    <p class="lead hero__lead" data-reveal>
+      Cocina marroquí y comida rápida para comer aquí, para llevar o a domicilio. En el corazón de
+      Salt, hasta medianoche.
+    </p>
+
+    <div class="hero__ctas" data-reveal>
+      <CallButton size="lg" showNumber />
+      <a class="btn btn--ghost btn--lg hero__secondary" href="#carta" data-cursor="Ver">
+        <span class="btn__inner">Ver la carta</span>
+      </a>
+    </div>
+
+    <a class="hero__rating" href={site.resenasUrl} target="_blank" rel="noopener noreferrer" data-reveal>
+      <span class="hero__stars" aria-hidden="true">
+        <Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" />
+      </span>
+      <span><strong>{site.notaGoogle}</strong> en Google · {site.numResenas} reseñas</span>
+      <span class="sr-only"> (se abre Google Maps en una pestaña nueva)</span>
+    </a>
+  </div>
+
+  <a class="hero__scroll" href="#nosotros" aria-label="Bajar a la siguiente sección">
+    <span class="hero__scroll-line" aria-hidden="true"></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-block: calc(var(--nav-h) + var(--space-xl)) var(--space-2xl);
+    overflow: clip;
+    isolation: isolate;
+  }
+  .hero__visual {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+  }
+  .hero__glow {
+    position: absolute;
+    inset: auto -20% -30% 30%;
+    block-size: 90%;
+    background: radial-gradient(closest-side, var(--accent-glow), transparent 70%);
+  }
+  .hero__rosette {
+    position: absolute;
+    inline-size: min(82vw, 46rem);
+    inset-block-start: 50%;
+    inset-inline-end: -14vw;
+    translate: 0 -50%;
+    opacity: 0.95;
+  }
+  .hero__arabic {
+    position: absolute;
+    inset-inline-start: var(--gutter);
+    inset-block-end: -0.18em;
+    font-family: var(--font-arabic);
+    font-weight: 600;
+    font-size: clamp(6rem, 2rem + 18vw, 22rem);
+    line-height: 1;
+    color: var(--text);
+    opacity: 0.05;
+    white-space: nowrap;
+  }
+  .hero__inner {
+    position: relative;
+    inline-size: 100%;
+  }
+  .hero__eyebrow {
+    margin-block-end: var(--space-m);
+  }
+  .hero__title {
+    max-inline-size: 11ch;
+    font-size: clamp(3.25rem, 1rem + 9.2vw, 10.5rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+  .hero__title :global(em) {
+    color: var(--accent);
+  }
+  .hero__lead {
+    max-inline-size: 34ch;
+    margin-block-start: var(--space-l);
+    color: var(--text-soft);
+  }
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-block-start: var(--space-l);
+  }
+  .hero__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-l);
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    text-decoration: none;
+  }
+  .hero__rating strong {
+    color: var(--text);
+  }
+  .hero__stars {
+    display: inline-flex;
+    gap: 0.1em;
+    color: var(--accent);
+  }
+  @media (hover: hover) {
+    .hero__rating:hover {
+      color: var(--text);
+    }
+  }
+  .hero__scroll {
+    position: absolute;
+    inset-block-end: var(--space-m);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: 2.75rem;
+    block-size: 3.5rem;
+    display: grid;
+    place-items: center;
+  }
+  .hero__scroll-line {
+    display: block;
+    inline-size: 1px;
+    block-size: 2.5rem;
+    background: linear-gradient(var(--accent), transparent);
+    transform-origin: top;
+    animation: scroll-hint 2.4s var(--ease-in-out) infinite;
+  }
+  @keyframes scroll-hint {
+    0% { transform: scaleY(0); }
+    50% { transform: scaleY(1); }
+    100% { transform: scaleY(1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__scroll-line { animation: none; }
+  }
+  /* Móvil: el rosetón arriba a la derecha, detrás del texto. */
+  @media (max-width: 767px) {
+    .hero {
+      align-items: flex-end;
+    }
+    .hero__rosette {
+      inline-size: 92vw;
+      inset-block-start: calc(var(--nav-h) - 1rem);
+      inset-inline-end: -38vw;
+      translate: 0 0;
+      opacity: 0.3;
+    }
+    .hero__ctas :global(.btn) {
+      inline-size: 100%;
+    }
+  }
+</style>

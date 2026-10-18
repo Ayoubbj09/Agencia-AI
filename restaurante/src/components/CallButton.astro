@@ -1,0 +1,61 @@
+---
+/**
+ * Botón de llamada (tel:). Es la forma principal de pedir en Al Madina.
+ * Azafrán (--accent) con texto en --bg (AA). Magnético en escritorio y con
+ * etiqueta de cursor "Llamar". No pongas data-reveal en el propio botón si es
+ * magnético (los dos animan transform): envuélvelo.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { site, toTelHref } from '../config/site';
+import Icon from './Icon.astro';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'ghost';
+  showNumber?: boolean;
+  magnetic?: boolean | number;
+}
+const {
+  label = 'Llamar y pedir',
+  size = 'md',
+  variant = 'primary',
+  showNumber = false,
+  magnetic = true,
+  class: className,
+  ...rest
+} = Astro.props;
+const magneticValue = magnetic === false ? undefined : magnetic === true ? '0.35' : String(magnetic);
+---
+
+<a
+  class:list={['btn', `btn--${variant}`, size !== 'md' && `btn--${size}`, 'call-btn', className]}
+  href={toTelHref(site.telefono)}
+  data-cursor="Llamar"
+  data-magnetic={magneticValue}
+  {...rest}
+>
+  <span class="btn__inner" data-magnetic-inner>
+    <Icon name="phone" />
+    <span class="call-btn__text">
+      <span>{label}</span>
+      {showNumber && <span class="call-btn__number">{site.telefono}</span>}
+    </span>
+  </span>
+</a>
+
+<style>
+  .call-btn__text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15em;
+  }
+  .call-btn__number {
+    font-size: 0.62em;
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+  }
+</style>

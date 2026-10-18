@@ -1,0 +1,129 @@
+---
+/**
+ * Nosotros (#nosotros). Texto BORRADOR para que lo apruebe el restaurante.
+ * Los tres rasgos salen de lo que repiten sus reseñas de Google.
+ * Para poner una foto del local, sustituye el arco decorativo por <Picture />.
+ */
+import Zellige from '../Zellige.astro';
+const rasgos = [
+  { t: 'Trato cercano', d: '“Nos atendieron con mucha amabilidad y respeto.”' },
+  { t: 'Comida que gusta', d: '“La comida estaba deliciosa.”' },
+  { t: 'Ambiente familiar', d: '“Es un sitio familiar.”' },
+];
+---
+
+<section id="nosotros" class="nosotros section" aria-labelledby="nosotros-title">
+  <div class="nosotros__grid container">
+    <div class="nosotros__arch" data-reveal="clip" aria-hidden="true">
+      <div class="nosotros__arch-inner">
+        <Zellige />
+      </div>
+    </div>
+
+    <div class="nosotros__text">
+      <p class="eyebrow" data-reveal>Nosotros</p>
+      <h2 id="nosotros-title" class="nosotros__title" data-reveal="split">
+        Un sitio <span class="nowrap"><em>familiar</em>,</span> donde te atienden como en casa.
+      </h2>
+      <p class="lead nosotros__lead" data-reveal>
+        Al Madina es un restaurante marroquí de comida rápida en el centro de Salt. Cocinamos con el
+        sabor de siempre, para que comas aquí, te lo lleves o te lo llevemos a casa.
+      </p>
+
+      <ul class="nosotros__rasgos" role="list" data-reveal-group="0.1">
+        {
+          rasgos.map((r) => (
+            <li class="nosotros__rasgo" data-reveal>
+              <h3 class="nosotros__rasgo-t">{r.t}</h3>
+              <p class="nosotros__rasgo-d">{r.d}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="nosotros__note" data-reveal>Frases de reseñas de clientes en Google.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .nosotros {
+    padding-block-start: calc(var(--section-space) + var(--space-l));
+  }
+  .nosotros__grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+  @media (min-width: 1024px) {
+    .nosotros__grid {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    }
+  }
+  .nosotros__arch {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    max-inline-size: 30rem;
+    border-radius: 999px 999px var(--radius-md) var(--radius-md);
+    background: radial-gradient(120% 80% at 50% 0%, var(--bg-elev-2), var(--bg-elev));
+    border: 1px solid var(--line-strong);
+    overflow: clip;
+    display: grid;
+    place-items: center;
+  }
+  .nosotros__arch-inner {
+    inline-size: 130%;
+    opacity: 0.9;
+  }
+  .nosotros__title {
+    margin-block-start: var(--space-s);
+    font-size: clamp(2.25rem, 1.1rem + 4.2vw, 5.25rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.98;
+    max-inline-size: 16ch;
+  }
+  .nosotros__title :global(em) {
+    color: var(--accent);
+  }
+  .nosotros__lead {
+    margin-block-start: var(--space-m);
+    max-inline-size: 46ch;
+    color: var(--text-soft);
+  }
+  .nosotros__rasgos {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-l);
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 640px) {
+    .nosotros__rasgos {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .nosotros__rasgo {
+    border-block-start: 2px solid var(--accent);
+    padding-block-start: var(--space-s);
+  }
+  .nosotros__rasgo:nth-child(2) {
+    border-color: var(--paprika);
+  }
+  .nosotros__rasgo:nth-child(3) {
+    border-color: var(--mint);
+  }
+  .nosotros__rasgo-t {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+  }
+  .nosotros__rasgo-d {
+    margin-block-start: var(--space-2xs);
+    color: var(--text-muted);
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+  .nosotros__note {
+    margin-block-start: var(--space-m);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+</style>

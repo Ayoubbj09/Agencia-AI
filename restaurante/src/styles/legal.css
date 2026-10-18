@@ -1,0 +1,285 @@
+/* ==========================================================================
+   Páginas legales (/aviso-legal, /privacidad) — PROPIETARIO: Sección D.
+   Pensadas para leer: medida de ~68 caracteres, texto a buen contraste,
+   índice lateral fijo en escritorio y nada de animaciones pesadas (solo el
+   reveal suave de la cabecera). Los [PENDIENTE] y [REVISAR CON GESTORÍA] usan
+   .pending (global.css): fondo naranja suave y texto oscuro, imposibles de pasar
+   por alto.
+   ========================================================================== */
+
+.legal {
+  padding-top: calc(var(--nav-h) + var(--space-xl));
+  padding-bottom: var(--space-2xl);
+}
+
+/* ── Cabecera ──────────────────────────────────────────────────────────── */
+.legal__head {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-s);
+  padding-bottom: var(--space-l);
+}
+.legal__draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  max-width: 100%;
+  margin-bottom: var(--space-m);
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--accent-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text);
+}
+.legal__draft .pending {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.legal__title {
+  font-size: clamp(2.75rem, 1.2rem + 6.4vw, 8rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  margin-top: var(--space-2xs);
+  text-wrap: balance;
+}
+.legal__meta {
+  margin-top: var(--space-xs);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ── Rejilla: índice + cuerpo ──────────────────────────────────────────── */
+.legal__layout {
+  display: grid;
+  gap: var(--space-l);
+  padding-top: var(--space-l);
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 64em) {
+  .legal__layout {
+    grid-template-columns: minmax(13rem, 17rem) minmax(0, var(--measure));
+    column-gap: clamp(3rem, 7vw, 9rem);
+    align-items: start;
+  }
+}
+
+/* Índice: lista compacta en móvil, columna fija en escritorio. */
+.legal__toc {
+  font-size: var(--fs-sm);
+  padding: var(--space-s) var(--space-s) var(--space-xs);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+@media (min-width: 64em) {
+  .legal__toc {
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-s));
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+}
+.legal__toc-title {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+.legal__toc ol {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+@media (min-width: 36em) and (max-width: 63.99em) {
+  .legal__toc ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-m);
+  }
+}
+.legal__toc a {
+  display: flex;
+  gap: 0.75em;
+  padding-block: 0.3rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  line-height: 1.35;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.legal__toc a:hover,
+.legal__toc a:focus-visible {
+  color: var(--text);
+}
+.legal__toc-num {
+  flex: none;
+  min-width: 1.6em;
+  font-variant-numeric: tabular-nums;
+  /* Naranja como en los números de sección (≈ 7:1 sobre --bg). Con
+     --text-muted a opacidad 0.7 quedaba en 3,6:1 (no AA). */
+  color: var(--accent);
+}
+
+/* ── Cuerpo de lectura ─────────────────────────────────────────────────── */
+.legal__body {
+  max-width: var(--measure);
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--text-soft);
+}
+.legal__body > * + * {
+  margin-top: var(--space-s);
+}
+.legal__lead {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+  color: var(--text);
+}
+.legal__section {
+  padding-top: var(--space-l);
+}
+.legal__section + .legal__section {
+  margin-top: var(--space-l);
+  border-top: 1px solid var(--line);
+}
+.legal__section > * + * {
+  margin-top: var(--space-s);
+}
+.legal__body h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: var(--space-s);
+}
+.legal__num {
+  flex: none;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  translate: 0 -0.15em;
+}
+.legal__body h3 {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+  color: var(--text);
+}
+.legal__body strong {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.legal__body ul {
+  padding-inline-start: 1.25em;
+  display: grid;
+  gap: 0.55rem;
+}
+.legal__body li::marker {
+  color: var(--accent);
+}
+/* Los enlaces de texto se ven subrayados también en reposo. */
+.legal__body a:not(.btn) {
+  color: var(--text);
+}
+
+/* Ficha de datos del titular (dl en dos columnas). */
+.legal__facts {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+.legal__facts > div {
+  display: grid;
+  gap: 0.15rem 1.5rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 36em) {
+  .legal__facts > div {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+}
+.legal__facts dt {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.legal__facts dd {
+  color: var(--text);
+}
+
+/* Tabla (transferencias internacionales). */
+.legal__table-wrap {
+  overflow-x: auto;
+}
+.legal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.legal__table caption {
+  text-align: left;
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--space-2xs);
+}
+.legal__table th,
+.legal__table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.7rem 1rem 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.legal__table thead th {
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  border-bottom-color: var(--line-strong);
+}
+.legal__table tbody th {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+/* Bloque destacado (p. ej. "no usamos cookies"). */
+.legal__callout {
+  padding: var(--space-s) var(--space-m);
+  border-left: 2px solid var(--accent);
+  background: var(--bg-elev);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  color: var(--text);
+}
+
+/* Los [PENDIENTE] largos pueden partirse en varias líneas sin perder el fondo. */
+.legal .pending {
+  line-height: 1.75;
+}
+
+/* Variante "finalidad → base legal": dos columnas de texto. */
+.legal__facts--pairs dt {
+  font-size: var(--fs-base);
+  color: var(--text);
+}
+.legal__facts--pairs dd {
+  color: var(--text-soft);
+}
+@media (min-width: 36em) {
+  .legal__facts--pairs > div {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  }
+}

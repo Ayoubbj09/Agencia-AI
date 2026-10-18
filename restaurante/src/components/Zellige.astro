@@ -1,0 +1,91 @@
+---
+/**
+ * Rosetón geométrico inspirado en el zellige marroquí (estrella de 8 puntas
+ * con anillos de estrellas). SVG puro, sin imágenes. Decorativo.
+ * `data-zellige-*` lo usa la animación del hero (giro y escala con el scroll).
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+
+// Estrella de 8 puntas: dos cuadrados girados 45°.
+const star = (r: number) => {
+  const pts: string[] = [];
+  for (let i = 0; i < 16; i++) {
+    const a = (Math.PI / 8) * i - Math.PI / 2;
+    const rr = i % 2 === 0 ? r : r * 0.76;
+    pts.push(`${(rr * Math.cos(a)).toFixed(2)},${(rr * Math.sin(a)).toFixed(2)}`);
+  }
+  return pts.join(' ');
+};
+const ring = (n: number, radius: number) =>
+  Array.from({ length: n }, (_, i) => {
+    const a = ((Math.PI * 2) / n) * i;
+    return { x: (radius * Math.cos(a)).toFixed(2), y: (radius * Math.sin(a)).toFixed(2), r: (a * 180) / Math.PI };
+  });
+const inner = ring(8, 128);
+const outer = ring(16, 214);
+---
+
+<svg class:list={['zellige', className]} viewBox="-260 -260 520 520" aria-hidden="true" focusable="false">
+  <g class="zellige__spin" data-zellige-spin>
+    <circle r="250" class="zellige__line" />
+    <circle r="238" class="zellige__line zellige__line--soft" />
+    <g data-zellige-outer>
+      {outer.map((p) => (
+        <g transform={`translate(${p.x} ${p.y}) rotate(${p.r})`}>
+          <polygon points={star(22)} class="zellige__tile zellige__tile--mint" />
+        </g>
+      ))}
+    </g>
+    <g data-zellige-inner>
+      {inner.map((p) => (
+        <g transform={`translate(${p.x} ${p.y}) rotate(${p.r})`}>
+          <polygon points={star(42)} class="zellige__tile zellige__tile--paprika" />
+          <polygon points={star(20)} class="zellige__tile zellige__tile--dark" />
+        </g>
+      ))}
+    </g>
+    <polygon points={star(150)} class="zellige__line" />
+    <polygon points={star(96)} class="zellige__tile zellige__tile--accent" data-zellige-core />
+    <polygon points={star(60)} class="zellige__tile zellige__tile--dark" />
+    <polygon points={star(30)} class="zellige__tile zellige__tile--accent" />
+  </g>
+</svg>
+
+<style>
+  .zellige {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+  .zellige__line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    opacity: 0.55;
+  }
+  .zellige__line--soft {
+    opacity: 0.22;
+  }
+  .zellige__tile {
+    stroke: var(--bg);
+    stroke-width: 3;
+  }
+  .zellige__tile--accent {
+    fill: var(--accent);
+  }
+  .zellige__tile--paprika {
+    fill: var(--paprika);
+  }
+  .zellige__tile--mint {
+    fill: var(--mint);
+  }
+  .zellige__tile--dark {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 1.2;
+  }
+</style>

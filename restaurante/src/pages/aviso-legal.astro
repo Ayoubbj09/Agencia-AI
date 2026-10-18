@@ -1,0 +1,104 @@
+---
+/**
+ * /aviso-legal (LSSI-CE, art. 10). BORRADOR pendiente de revisión.
+ * Datos del titular desde src/config/site.ts (<SiteValue> resalta los pendientes).
+ */
+import Base from '../layouts/Base.astro';
+import '../styles/legal.css';
+import SiteValue from '../components/SiteValue.astro';
+import { site } from '../config/site';
+
+const sections = [
+  { id: 'titular', title: 'Titular del sitio web' },
+  { id: 'objeto', title: 'Objeto del sitio web' },
+  { id: 'condiciones', title: 'Condiciones de uso' },
+  { id: 'propiedad', title: 'Propiedad intelectual' },
+  { id: 'responsabilidad', title: 'Responsabilidad' },
+  { id: 'datos', title: 'Protección de datos y cookies' },
+  { id: 'legislacion', title: 'Legislación aplicable' },
+];
+const n = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<Base title="Aviso legal" path="/aviso-legal" description="Aviso legal de Al Madina: datos del titular y condiciones de uso del sitio web.">
+  <article class="legal" aria-labelledby="legal-title">
+    <div class="container">
+      <header class="legal__head">
+        {!site.legalCompleto && (
+          <p class="legal__draft" role="note" data-reveal="fade">
+            <mark class="pending">Borrador pendiente de revisión</mark>
+            <span>Texto provisional: debe revisarlo la gestoría del restaurante antes de publicar la web.</span>
+          </p>
+        )}
+        <p class="eyebrow" data-reveal>Legal</p>
+        <h1 class="legal__title" id="legal-title" data-reveal>Aviso legal</h1>
+        <p class="legal__meta" data-reveal>Última actualización: {site.legalActualizado}</p>
+      </header>
+
+      <div class="legal__layout">
+        <nav class="legal__toc" aria-labelledby="legal-toc-title">
+          <p class="legal__toc-title" id="legal-toc-title">Contenido</p>
+          <ol role="list">
+            {sections.map((s, i) => (
+              <li><a href={`#${s.id}`}><span class="legal__toc-num" aria-hidden="true">{n(i)}</span>{s.title}</a></li>
+            ))}
+          </ol>
+        </nav>
+
+        <div class="legal__body">
+          <p class="legal__lead">
+            En cumplimiento del artículo 10 de la Ley 34/2002, de servicios de la sociedad de la
+            información y de comercio electrónico (LSSI-CE), te informamos de quién está detrás de
+            esta web y de las condiciones para usarla.
+          </p>
+
+          <section class="legal__section" id="titular" aria-labelledby="titular-h">
+            <h2 id="titular-h"><span class="legal__num" aria-hidden="true">{n(0)}</span>{sections[0].title}</h2>
+            <p>“{site.nombreComercial}” es el nombre comercial con el que <SiteValue value={site.nombreLegal} /> explota el restaurante situado en {site.direccion}, {site.codigoPostal} {site.ciudad}.</p>
+            <dl class="legal__facts">
+              <div><dt>Titular</dt><dd><SiteValue value={site.nombreLegal} /></dd></div>
+              <div><dt>NIF</dt><dd><SiteValue value={site.nif} /></dd></div>
+              <div><dt>Domicilio del titular</dt><dd><SiteValue value={site.domicilioTitular} /></dd></div>
+              <div><dt>Establecimiento</dt><dd>{site.direccion}, {site.codigoPostal} {site.ciudad}</dd></div>
+              <div><dt>Teléfono</dt><dd><span class="nowrap">{site.telefono}</span></dd></div>
+              <div><dt>Correo electrónico</dt><dd><SiteValue value={site.correo} kind="email" /></dd></div>
+              <div><dt>Datos registrales</dt><dd>Si los hubiera: <mark class="pending">[REVISAR CON GESTORÍA]</mark></dd></div>
+            </dl>
+          </section>
+
+          <section class="legal__section" id="objeto" aria-labelledby="objeto-h">
+            <h2 id="objeto-h"><span class="legal__num" aria-hidden="true">{n(1)}</span>{sections[1].title}</h2>
+            <p>Esta web presenta el restaurante {site.nombreComercial}: su carta, su ubicación, su horario y las formas de hacer un pedido. Los pedidos y reservas se hacen por teléfono; la web no vende ni cobra nada directamente.</p>
+            <p>La carta, los precios y el horario son orientativos y pueden cambiar sin previo aviso. Ante cualquier duda (por ejemplo, sobre alérgenos), pregunta al hacer tu pedido.</p>
+          </section>
+
+          <section class="legal__section" id="condiciones" aria-labelledby="condiciones-h">
+            <h2 id="condiciones-h"><span class="legal__num" aria-hidden="true">{n(2)}</span>{sections[2].title}</h2>
+            <p>Puedes navegar por esta web libremente y sin registrarte. Te comprometes a usarla de forma lícita y a no dañar su funcionamiento.</p>
+          </section>
+
+          <section class="legal__section" id="propiedad" aria-labelledby="propiedad-h">
+            <h2 id="propiedad-h"><span class="legal__num" aria-hidden="true">{n(3)}</span>{sections[3].title}</h2>
+            <p>Los textos, el diseño, el logotipo y el nombre comercial “{site.nombreComercial}” pertenecen a su titular o se usan con permiso. No se pueden copiar ni reutilizar con fines comerciales sin autorización.</p>
+            <p>Las reseñas citadas son extractos de opiniones públicas de clientes en Google; pertenecen a sus autores.</p>
+          </section>
+
+          <section class="legal__section" id="responsabilidad" aria-labelledby="responsabilidad-h">
+            <h2 id="responsabilidad-h"><span class="legal__num" aria-hidden="true">{n(4)}</span>{sections[4].title}</h2>
+            <p>Intentamos que la información de esta web sea correcta y esté actualizada, pero no podemos garantizar que no haya errores. No nos hacemos responsables del contenido de las webs externas a las que enlazamos (Google Maps, Instagram y TikTok).</p>
+          </section>
+
+          <section class="legal__section" id="datos" aria-labelledby="datos-h">
+            <h2 id="datos-h"><span class="legal__num" aria-hidden="true">{n(5)}</span>{sections[5].title}</h2>
+            <p>Esta web no instala cookies ni guarda información en tu navegador. Cómo tratamos los datos de quien nos llama o escribe se explica en la <a class="link link--underlined" href="/privacidad">política de privacidad</a>.</p>
+          </section>
+
+          <section class="legal__section" id="legislacion" aria-labelledby="legislacion-h">
+            <h2 id="legislacion-h"><span class="legal__num" aria-hidden="true">{n(6)}</span>{sections[6].title}</h2>
+            <p>Este aviso legal se rige por la legislación española. Si eres consumidor, serán competentes los juzgados de tu domicilio. <mark class="pending">[REVISAR CON GESTORÍA]</mark></p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>

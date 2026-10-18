@@ -1,0 +1,393 @@
+---
+/**
+ * Navegación fija (spec §7.0).
+ *  - Logo a la izquierda; anclas + "Llamar" (tel:, magnético) a la derecha.
+ *  - Se oculta al bajar y reaparece al subir (core/nav.ts).
+ *  - < 1024 px: botón "Menú" que abre un menú a pantalla completa (#menu).
+ *    Accesible: aria-expanded/aria-controls, Escape cierra, el foco entra y vuelve,
+ *    el resto de la página queda `inert` y el scroll bloqueado (lenis.stop()).
+ *  - Sin JavaScript: el botón se sustituye por un enlace a #menu y el menú se
+ *    muestra con :target (los enlaces siguen siendo alcanzables).
+ */
+import { navLinks, navHref, site } from '../config/site';
+import Logo from './Logo.astro';
+import CallButton from './CallButton.astro';
+import Icon from './Icon.astro';
+import { toTelHref } from '../config/site';
+
+interface Props {
+  isHome?: boolean;
+}
+const { isHome = false } = Astro.props;
+---
+
+<header class="nav" data-nav>
+  <div class="nav__bar container">
+    <a class="nav__brand" href={isHome ? '#inicio' : '/'} data-cursor-hover>
+      <Logo />
+    </a>
+
+    <nav class="nav__links" aria-label="Principal">
+      <ul role="list">
+        {
+          navLinks.map((l) => (
+            <li>
+              <a class="link" href={navHref(l.id, isHome)}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="nav__actions">
+      <CallButton class="nav__cta" label="Llamar" size="sm" magnetic={0.4} />
+
+      {/* Con JS: botón de menú (móvil/tablet). */}
+      <button
+        class="nav__toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="menu"
+        data-menu-toggle
+      >
+        <span class="nav__toggle-text">
+          <span class="nav__toggle-open">Menú</span>
+          <span class="nav__toggle-close" aria-hidden="true">Cerrar</span>
+        </span>
+        <span class="nav__toggle-icon" aria-hidden="true"><span></span><span></span></span>
+      </button>
+      {/* Sin JS: enlace equivalente que abre el menú con :target. */}
+      <a class="nav__toggle nav__toggle--nojs" href="#menu">
+        <span class="nav__toggle-text"><span class="nav__toggle-open">Menú</span></span>
+        <span class="nav__toggle-icon" aria-hidden="true"><span></span><span></span></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+{/* data-lenis-prevent: con lenis.stop() Lenis anula la rueda y el gesto táctil;
+    sin esto el menú no se podría desplazar en pantallas bajas (móvil en horizontal). */}
+<div class="menu" id="menu" data-menu data-lenis-prevent>
+  <div class="menu__inner container">
+    <nav class="menu__nav" aria-label="Menú">
+      <ol class="menu__list" role="list">
+        {
+          navLinks.map((l, i) => (
+            <li class="menu__item">
+              <span class="menu__mask">
+                <a class="menu__link" href={navHref(l.id, isHome)} data-menu-line>
+                  <span class="menu__index" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  {l.label}
+                </a>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="menu__footer">
+      <span class="menu__mask">
+        <a class="btn btn--primary btn--lg menu__cta" href={toTelHref(site.telefono)} data-menu-line>
+          <span class="btn__inner">
+            <Icon name="phone" />
+            Llamar y pedir
+          </span>
+        </a>
+      </span>
+      <span class="menu__mask">
+        <p class="menu__meta" data-menu-line>{site.telefono} · {site.direccion}, {site.ciudad}</p>
+      </span>
+      {/* Solo sin JS: cerrar el menú abierto con :target. */}
+      <a class="menu__close-nojs link" href="#main">Cerrar menú</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Barra ─────────────────────────────────────────────────────────────── */
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-nav);
+    view-transition-name: site-nav;
+    transition: transform 0.7s var(--ease-expo);
+  }
+  /* Fondo que aparece al hacer scroll (solo opacidad). */
+  .nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgb(11 10 9 / 0.92), rgb(11 10 9 / 0.7));
+    border-bottom: 1px solid var(--line);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .nav.is-scrolled::before {
+    opacity: 1;
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .nav::before {
+      /* Bastante opaco: el texto que pasa por debajo no compite con los enlaces. */
+      background: rgb(11 10 9 / 0.8);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    }
+  }
+  /* Oculta al bajar; nunca si tiene el foco del teclado o el menú está abierto. */
+  .nav.is-hidden:not(:focus-within) {
+    transform: translate3d(0, -100%, 0);
+  }
+  :global(html.menu-open) .nav {
+    transform: none;
+  }
+  :global(html.menu-open) .nav::before {
+    opacity: 0;
+  }
+
+  .nav__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    height: var(--nav-h);
+  }
+  .nav__brand {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.5rem;
+    margin-inline-end: auto;
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+  }
+
+  .nav__links ul {
+    display: flex;
+    gap: clamp(1.25rem, 0.5rem + 1.6vw, 2.5rem);
+  }
+  .nav__links a {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    letter-spacing: -0.005em;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding-block: 0.5rem;
+  }
+  .nav__links a:hover,
+  .nav__links a:focus-visible {
+    color: var(--text);
+  }
+  .nav__links a::after {
+    bottom: 0.3rem;
+  }
+
+  .nav__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-inline-start: clamp(0.5rem, 2vw, 2rem);
+  }
+
+  /* Botón de menú */
+  .nav__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    height: 2.5rem;
+    padding-inline: 1rem 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color var(--dur-base) var(--ease-out);
+  }
+  .nav__toggle:hover {
+    border-color: var(--text);
+  }
+  .nav__toggle-text {
+    display: grid;
+    overflow: hidden;
+  }
+  .nav__toggle-text > span {
+    grid-area: 1 / 1;
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .nav__toggle-close {
+    transform: translate3d(0, 110%, 0);
+  }
+  .nav__toggle[aria-expanded='true'] .nav__toggle-open {
+    transform: translate3d(0, -110%, 0);
+  }
+  .nav__toggle[aria-expanded='true'] .nav__toggle-close {
+    transform: none;
+  }
+  .nav__toggle-icon {
+    position: relative;
+    display: block;
+    inline-size: 1rem;
+    block-size: 0.6rem;
+  }
+  .nav__toggle-icon span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .nav__toggle-icon span:first-child {
+    top: 0;
+  }
+  .nav__toggle-icon span:last-child {
+    bottom: 0;
+  }
+  .nav__toggle[aria-expanded='true'] .nav__toggle-icon span:first-child {
+    transform: translate3d(0, 0.26rem, 0) rotate(45deg);
+  }
+  .nav__toggle[aria-expanded='true'] .nav__toggle-icon span:last-child {
+    transform: translate3d(0, -0.26rem, 0) rotate(-45deg);
+  }
+
+  /* Con JS se usa el <button>; sin JS, el enlace a #menu. */
+  .nav__toggle--nojs {
+    display: none;
+  }
+  :global(html:not(.js)) .nav__toggle[data-menu-toggle] {
+    display: none;
+  }
+  :global(html:not(.js)) .nav__toggle--nojs {
+    display: inline-flex;
+  }
+
+  /* Escritorio: enlaces visibles, sin botón de menú. */
+  @media (min-width: 64em) {
+    .nav__toggle,
+    :global(html:not(.js)) .nav__toggle--nojs {
+      display: none;
+    }
+  }
+  /* Móvil/tablet: sin enlaces en la barra; "Escríbenos" compacto. */
+  @media (max-width: 63.999em) {
+    .nav__links {
+      display: none;
+    }
+  }
+  @media (max-width: 29.999em) {
+    /* En móviles estrechos el CTA queda solo con el icono (texto accesible intacto). */
+    .nav__actions :global(.nav__cta) {
+      --btn-px: 0;
+      inline-size: var(--btn-h);
+    }
+    .nav__actions :global(.nav__cta .call-btn__text) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  /* ── Menú a pantalla completa ──────────────────────────────────────────── */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-menu);
+    background: var(--bg);
+    visibility: hidden;
+    opacity: 0;
+  }
+  .menu.is-open,
+  :global(html:not(.js)) .menu:target {
+    visibility: visible;
+    opacity: 1;
+  }
+  /* Sin JS no hay animación; con JS core/nav.ts anima opacidad y líneas. */
+  /* La zona con scroll empieza DEBAJO de la barra (transparente con el menú
+     abierto): en pantallas bajas el contenido no pasa por detrás del logo. */
+  .menu__inner {
+    position: absolute;
+    inset: var(--nav-h) 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-xl);
+    padding-block: var(--space-l);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .menu__list {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .menu__mask {
+    display: block;
+    overflow: clip;
+    /* deja ver el anillo de foco del enlace */
+    padding: 0.25rem;
+    margin: -0.25rem;
+  }
+  .menu__link {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    font-size: clamp(2.5rem, 1.2rem + 7vw, 4.5rem);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    text-decoration: none;
+    padding-block: 0.1em;
+  }
+  .menu__index {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    transform: translateY(-1.6em);
+  }
+  .menu__footer {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+  .menu__cta {
+    --btn-h: 3.75rem;
+    font-size: var(--fs-lg);
+  }
+  .menu__meta {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  .menu__close-nojs {
+    display: none;
+    font-size: var(--fs-sm);
+  }
+  :global(html:not(.js)) .menu__close-nojs {
+    display: inline-block;
+  }
+  /* Móvil en horizontal: enlaces más bajos para que quepa casi todo sin scroll. */
+  @media (max-height: 32em) {
+    .menu__inner {
+      gap: var(--space-m);
+      padding-block: var(--space-s);
+    }
+    .menu__link {
+      font-size: clamp(1.75rem, 1rem + 6vh, 3rem);
+    }
+    .menu__cta {
+      --btn-h: 3rem;
+      font-size: var(--fs-base);
+    }
+  }
+  @media (min-width: 64em) {
+    .menu {
+      display: none;
+    }
+  }
+</style>

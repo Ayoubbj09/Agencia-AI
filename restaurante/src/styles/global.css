@@ -1,0 +1,651 @@
+/* ==========================================================================
+   Al Madina · Estilos globales
+   Orden: fuentes → reset → base → tipografía → utilidades → enlaces/botones
+          → foco → [PENDIENTE] → grano → patrón sin-JS → View Transitions
+   El CSS propio de cada sección vive en su componente (<style> con scope).
+   ========================================================================== */
+
+@import './tokens.css';
+
+/* ── Fuentes autoalojadas (Fontsource) ────────────────────────────────────
+   Bricolage Grotesque variable (titulares y texto), Fraunces variable cursiva
+   (acentos cálidos) y Reem Kufi (rótulo árabe "المدينة"). Cada subset lleva
+   unicode-range: el navegador solo descarga lo que usa. */
+@import '@fontsource-variable/bricolage-grotesque/wght.css';
+@import '@fontsource-variable/fraunces/wght-italic.css';
+@import '@fontsource-variable/reem-kufi/wght.css';
+
+/* Fuentes de reserva con métricas aproximadas (menos salto al cargar). */
+@font-face {
+  font-family: 'Bricolage Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 104%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback';
+  src: local('Georgia'), local('Times New Roman');
+  size-adjust: 100%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+/* ── Reset moderno ─────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Sin scroll-behavior: smooth (lo gestiona Lenis). Nunca overflow en html/body. */
+  hanging-punctuation: first last;
+}
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+img,
+video {
+  height: auto;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Contenedor de página: evita el scroll horizontal accidental SIN romper sticky
+   ni los pins de ScrollTrigger (clip no crea contenedor de scroll). */
+.page {
+  overflow-x: clip;
+  position: relative;
+}
+
+/* Menú móvil abierto: scroll bloqueado también sin Lenis (reduced motion).
+   Es temporal (mismo `clip` que usa lenis.css al hacer lenis.stop()); nunca se
+   deja overflow en html/body de forma permanente. */
+html.menu-open {
+  overflow: clip;
+}
+
+/* Sin Lenis (reduced motion o sin JS) los saltos a anclas nativos dejan sitio a
+   la nav fija. Con Lenis NO: Lenis ya suma el offset -80 y además lee
+   scroll-margin-top, así que se duplicaría. */
+html:not(.lenis) :target,
+html:not(.lenis) section[id] {
+  scroll-margin-top: var(--nav-h);
+}
+
+/* ── Tipografía ────────────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+}
+h1,
+.display {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--lh-tight);
+}
+h2,
+.h2 {
+  font-size: var(--fs-h2);
+  line-height: 1;
+}
+h3,
+.h3 {
+  font-size: var(--fs-h3);
+  letter-spacing: -0.025em;
+}
+p {
+  text-wrap: pretty;
+}
+strong,
+b {
+  font-weight: var(--fw-semibold);
+}
+
+/* Acento editorial: Instrument Serif en cursiva dentro de titulares.
+   Automático para <em> en h1–h4/.display/.h2/.statement, o con la clase .serif. */
+.serif,
+:is(h1, h2, h3, h4, .display, .h2, .h3, .statement, .mega) em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+/* Dentro de titulares: la serif tiene menos altura de x; se compensa un poco
+   sin alterar el interlineado. */
+:is(h1, h2, h3, h4, .display, .h2, .h3, .statement, .mega) :is(em, .serif) {
+  font-size: 1.06em;
+  line-height: 0;
+}
+
+/* SplitText (core/split.ts): las máscaras por línea recortan con overflow: clip.
+   Con interlineados de 0.9–1 se comerían descendentes (g, p) y tildes de
+   mayúsculas: se amplía la zona visible sin mover el texto. */
+/* Los márgenes negativos entre líneas se colapsarían (solo contaría el mayor),
+   así que entre líneas va un único margin-top que compensa ambos paddings. */
+.split-line-mask {
+  padding-block: 0.12em 0.16em;
+  margin-top: -0.28em;
+}
+.split-line-mask:first-child {
+  margin-top: -0.12em;
+}
+.split-line-mask:last-child {
+  margin-bottom: -0.16em;
+}
+.serif--accent,
+em.accent {
+  color: var(--accent);
+}
+
+.statement {
+  font-size: var(--fs-statement);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.mega {
+  font-size: var(--fs-mega);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.055em;
+  line-height: 0.88;
+}
+.lead {
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 40ch;
+}
+.muted {
+  color: var(--text-muted);
+}
+.text-accent {
+  color: var(--accent);
+}
+
+/* Etiqueta pequeña de sección: "01 — Qué hace" */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+.eyebrow::before {
+  content: '';
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+.eyebrow__index {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Etiqueta tipo "chip" (p. ej. "Conversación de ejemplo", "Imágenes ilustrativas") */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.75em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--narrow {
+  max-width: calc(var(--container-narrow) + 2 * var(--gutter));
+}
+.section {
+  position: relative;
+  padding-block: var(--section-space);
+}
+.rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+/* ── Utilidades ────────────────────────────────────────────────────────── */
+/* Carruseles con scroll horizontal propio: llevan data-lenis-prevent (spec) y
+   data-scroll-x. lenis.css pone `overscroll-behavior: contain` a todo
+   [data-lenis-prevent], lo que BLOQUEA el scroll vertical de la página encima
+   del carrusel (comprobado). Aquí se limita la contención al eje X. */
+html [data-scroll-x],
+html.lenis [data-lenis-prevent][data-scroll-x] {
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Enlace "Saltar al contenido" */
+.skip-link {
+  position: fixed;
+  top: var(--space-s);
+  left: var(--space-s);
+  z-index: var(--z-skip);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-pill);
+  background: var(--text);
+  color: var(--bg);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus-visible {
+  transform: none;
+}
+/* <main tabindex="-1"> recibe el foco del skip link: sin anillo alrededor de toda la página. */
+#main:focus {
+  outline: none;
+}
+
+/* ── Enlaces ───────────────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+/* Enlace con subrayado animado (solo transform). */
+.link {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.6s var(--ease-expo);
+}
+.link:focus-visible::after,
+.link[aria-current='page']::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+@media (hover: hover) {
+  .link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+/* Variante: subrayado visible en reposo (enlaces dentro de texto). */
+.link--underlined::after {
+  transform: scaleX(1);
+  opacity: 0.4;
+  transition:
+    transform 0.6s var(--ease-expo),
+    opacity var(--dur-fast) var(--ease-out);
+}
+.link--underlined:hover::after {
+  opacity: 1;
+}
+
+/* ── Botones ───────────────────────────────────────────────────────────── */
+.btn {
+  --btn-h: 3.25rem;
+  --btn-px: 1.5rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65em;
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    scale var(--dur-base) var(--ease-expo);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  pointer-events: none;
+}
+.btn svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+/* `scale` (propiedad individual) y no `transform`: así no choca con el efecto
+   magnético, que mueve el botón con transform desde GSAP. */
+.btn:active {
+  scale: 0.97;
+}
+
+/* Principal: naranja con texto/icono en --bg (AA ≈ 7:1). Nunca blanco. */
+.btn--primary {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+@media (hover: hover) {
+  .btn--primary:hover {
+    background-color: var(--accent-soft);
+  }
+}
+
+/* Secundario: contorno fino */
+.btn--ghost {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+@media (hover: hover) {
+  .btn--ghost:hover {
+    border-color: var(--text);
+  }
+}
+
+.btn--sm {
+  --btn-h: 2.5rem;
+  --btn-px: 1.1rem;
+  font-size: var(--fs-sm);
+}
+.btn--lg {
+  --btn-h: clamp(4rem, 3.2rem + 2.4vw, 5.5rem);
+  --btn-px: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
+  font-size: var(--fs-xl);
+  letter-spacing: -0.02em;
+}
+.btn--icon {
+  --btn-px: 0;
+  inline-size: var(--btn-h);
+}
+
+/* ── Foco visible (teclado) ────────────────────────────────────────────── */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.btn:focus-visible {
+  border-radius: var(--radius-pill);
+  outline-offset: 4px;
+}
+
+/* ── [PENDIENTE] y [REVISAR CON GESTORÍA] ──────────────────────────────── */
+.pending {
+  background: var(--pending-bg);
+  color: var(--pending-text);
+  padding: 0.05em 0.4em;
+  border-radius: 0.3em;
+  font-weight: var(--fw-medium);
+  font-style: normal;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ── Grano (spec §4): mosaico fijo, sin blend mode y sin animar ────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  background-image: url('../assets/textures/grain.png');
+  background-size: 160px 160px;
+  background-repeat: repeat;
+  opacity: 0.06;
+}
+
+/* ── Cursor personalizado (lo activa core/cursor.ts solo en escritorio) ── */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-cursor);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+html.has-cursor .cursor.is-visible {
+  opacity: 1;
+}
+.cursor__dot {
+  position: absolute;
+  top: -2.75rem;
+  left: -2.75rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: scale(0.1);
+  transition:
+    transform 0.55s var(--ease-expo),
+    background-color var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
+  will-change: transform;
+}
+.cursor.is-hover .cursor__dot {
+  transform: scale(0.42);
+  opacity: 0.35;
+}
+.cursor.has-label .cursor__dot {
+  transform: scale(1);
+  opacity: 1;
+  background: var(--text);
+}
+.cursor.is-down .cursor__dot {
+  transform: scale(0.08);
+}
+.cursor.has-label.is-down .cursor__dot {
+  transform: scale(0.9);
+}
+.cursor__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.cursor.has-label .cursor__label {
+  opacity: 1;
+  transition-delay: 0.08s;
+}
+/* El cursor nativo se oculta SOLO con el cursor propio activo, y nunca en campos de texto. */
+html.has-cursor.cursor-hide-native,
+html.has-cursor.cursor-hide-native * {
+  cursor: none;
+}
+html.has-cursor.cursor-hide-native :is(input, textarea, select, [contenteditable='true']) {
+  cursor: auto;
+}
+
+/* ── Patrón "sin JavaScript y sin parpadeo" (spec §9) ───────────────────────
+   1. El script inline de <head> añade .js y, sin reduced motion, .motion.
+   2. Los estados iniciales ocultos SOLO existen bajo html.js.motion.
+   3. Salvavidas: si a los 3 s no hay .anim-ready, se muestra todo.
+   Variantes de [data-reveal] (ver core/reveal.ts):
+     ""/"up" fade + 40px · "fade" solo opacidad · "clip" clip-path de abajo
+     arriba (imágenes) · "split" líneas con máscara · "manual" lo anima la sección */
+html.js.motion [data-reveal] {
+  opacity: 0;
+}
+html.js.motion :is([data-reveal=''], [data-reveal='up']) {
+  transform: translate3d(0, 40px, 0);
+}
+html.js.motion [data-reveal='clip'] {
+  opacity: 1;
+  clip-path: inset(100% 0 0 0);
+}
+@keyframes reveal-failsafe {
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+html.js:not(.anim-ready) [data-reveal] {
+  animation: reveal-failsafe 0s linear forwards;
+  animation-delay: 3s;
+}
+
+/* ── Transiciones entre páginas (View Transitions entre documentos) ────── */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: vt-out 0.35s var(--ease-in-out) both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-in 0.7s var(--ease-expo) 0.1s both;
+  }
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+/* ── Movimiento reducido: todo inmediato ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}

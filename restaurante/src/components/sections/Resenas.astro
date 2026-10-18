@@ -1,0 +1,136 @@
+---
+/**
+ * Reseñas (#resenas). Extractos reales de reseñas de Google (nombre + inicial
+ * del apellido). Actualiza nota y número en site.ts.
+ */
+import { site } from '../../config/site';
+import Icon from '../Icon.astro';
+const resenas = [
+  {
+    texto: 'Experiencia muy agradable. Desde el primer momento nos atendieron con mucha amabilidad, respeto…',
+    autor: 'Sara C.',
+  },
+  {
+    texto:
+      'Una experiencia excelente. La comida estaba deliciosa y el personal fue muy amable, atento y servicial en todo momento. Es un sitio familiar…',
+    autor: 'Noni N.',
+  },
+  {
+    texto: 'Muy buen ambiente, muy amables y una comida espectacular. Quiero repetir…',
+    autor: 'Osuman S.',
+  },
+];
+---
+
+<section id="resenas" class="resenas section" aria-labelledby="resenas-title">
+  <div class="resenas__grid container">
+    <div class="resenas__score">
+      <p class="eyebrow" data-reveal>Reseñas</p>
+      <h2 id="resenas-title" class="sr-only">Lo que dicen nuestros clientes</h2>
+      <p class="resenas__num" data-reveal>{site.notaGoogle}</p>
+      <p class="resenas__stars" data-reveal aria-label="5 de 5 estrellas">
+        <Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" />
+      </p>
+      <p class="resenas__count" data-reveal>{site.numResenas} reseñas en Google</p>
+      <p data-reveal>
+        <a class="link link--underlined resenas__more" href={site.resenasUrl} target="_blank" rel="noopener noreferrer">
+          Ver todas en Google<span class="sr-only"> (se abre en una pestaña nueva)</span>
+        </a>
+      </p>
+    </div>
+
+    <ul class="resenas__list" role="list" data-reveal-group="0.12">
+      {
+        resenas.map((r, i) => (
+          <li class:list={['resena', `resena--${i + 1}`]} data-reveal>
+            <blockquote class="resena__quote">
+              <p>{r.texto}</p>
+            </blockquote>
+            <p class="resena__autor">
+              <span class="resena__stars" aria-label="5 de 5 estrellas">
+                <Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" />
+              </span>
+              {r.autor} · Google
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .resenas__grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  @media (min-width: 1024px) {
+    .resenas__grid {
+      grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    }
+    .resenas__score {
+      position: sticky;
+      inset-block-start: calc(var(--nav-h) + var(--space-l));
+    }
+  }
+  .resenas__num {
+    font-size: clamp(6rem, 2rem + 14vw, 15rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    color: var(--accent);
+    margin-block-start: var(--space-s);
+  }
+  .resenas__stars {
+    display: flex;
+    gap: 0.15em;
+    font-size: var(--fs-xl);
+    color: var(--accent);
+    margin-block-start: var(--space-s);
+  }
+  .resenas__count {
+    margin-block-start: var(--space-2xs);
+    font-size: var(--fs-lg);
+    color: var(--text-soft);
+  }
+  .resenas__more {
+    display: inline-block;
+    margin-block-start: var(--space-m);
+  }
+  .resenas__list {
+    display: grid;
+    gap: var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+  .resena {
+    padding: var(--space-l);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+  }
+  .resena--2 {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .resena__quote p {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-xl);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+  .resena__autor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-m);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+  .resena__stars {
+    display: inline-flex;
+    color: var(--accent);
+  }
+</style>

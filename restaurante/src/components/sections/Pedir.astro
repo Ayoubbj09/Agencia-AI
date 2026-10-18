@@ -1,0 +1,121 @@
+---
+/** Cómo pedir (#pedir): comer aquí, para llevar, a domicilio + llamada. */
+import { site } from '../../config/site';
+import CallButton from '../CallButton.astro';
+import Icon from '../Icon.astro';
+const formas = [
+  { icon: 'plate', t: 'Comer aquí', d: `Ven a ${site.direccion}, en ${site.ciudad}. Te esperamos.`, color: 'accent' },
+  { icon: 'bag', t: 'Para llevar', d: 'Llámanos, haz tu pedido y pásate a recogerlo.', color: 'paprika' },
+  { icon: 'scooter', t: 'A domicilio', d: 'Pídelo a domicilio y disfrútalo en casa.', color: 'mint' },
+] as const;
+---
+
+<section id="pedir" class="pedir section" aria-labelledby="pedir-title">
+  <div class="container">
+    <p class="eyebrow" data-reveal>Cómo pedir</p>
+    <h2 id="pedir-title" class="pedir__title" data-reveal="split">
+      Como más te <em>guste</em>.
+    </h2>
+
+    <ul class="pedir__list" role="list" data-reveal-group="0.1">
+      {
+        formas.map((f, i) => (
+          <li class:list={['forma', `forma--${f.color}`]} data-reveal>
+            <span class="forma__num" aria-hidden="true">0{i + 1}</span>
+            <span class="forma__icon"><Icon name={f.icon} size="2rem" /></span>
+            <h3 class="forma__t">{f.t}</h3>
+            <p class="forma__d">{f.d}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="pedir__note" data-reveal>
+      <span class="pending">[PENDIENTE: confirmar zona de reparto y si también se pide por Glovo, Just Eat u otra app]</span>
+    </p>
+
+    <div class="pedir__cta" data-reveal>
+      <CallButton size="lg" showNumber label="Llamar y pedir" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .pedir__title {
+    margin-block-start: var(--space-s);
+    font-size: clamp(2.5rem, 1rem + 5.6vw, 6.5rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.95;
+  }
+  .pedir__title :global(em) {
+    color: var(--accent);
+  }
+  .pedir__list {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 900px) {
+    .forma {
+      min-block-size: 18rem;
+    }
+    .pedir__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .forma {
+    --c: var(--accent);
+    position: relative;
+    padding: var(--space-l);
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    overflow: clip;
+    min-block-size: 13rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .forma--paprika {
+    --c: var(--paprika);
+  }
+  .forma--mint {
+    --c: var(--mint);
+  }
+  .forma::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    block-size: 4px;
+    background: var(--c);
+  }
+  .forma__num {
+    position: absolute;
+    inset-block-start: var(--space-s);
+    inset-inline-end: var(--space-m);
+    font-size: clamp(3rem, 2rem + 3vw, 5rem);
+    font-weight: var(--fw-bold);
+    color: var(--line-strong);
+    letter-spacing: -0.05em;
+  }
+  .forma__icon {
+    color: var(--c);
+  }
+  .forma__t {
+    margin-block-start: auto;
+    padding-block-start: var(--space-l);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-bold);
+  }
+  .forma__d {
+    margin-block-start: var(--space-2xs);
+    color: var(--text-soft);
+  }
+  .pedir__note {
+    margin-block-start: var(--space-m);
+    font-size: var(--fs-sm);
+  }
+  .pedir__cta {
+    margin-block-start: var(--space-l);
+  }
+</style>

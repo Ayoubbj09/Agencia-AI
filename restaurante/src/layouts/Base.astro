@@ -1,0 +1,172 @@
+---
+/**
+ * Layout base de todas las páginas.
+ *
+ *  - SEO completo (spec §10): título, descripción, canónica desde `dominio`,
+ *    Open Graph + Twitter con /og.png absoluta, favicon, theme-color y JSON-LD
+ *    (Restaurant) sin datos inventados: solo lo que hay en site.ts y
+ *    nunca un "[PENDIENTE…]".
+ *  - robots: noindex,nofollow mientras `legalCompleto` sea false (o si la página
+ *    lo pide con `noindex`).
+ *  - Patrón sin-JS/sin-parpadeo (spec §9): script inline bloqueante que añade
+ *    `js` y, sin reduced motion, `motion` a <html>.
+ *  - Estructura: skip link → Nav → .page( <main id="main"> → Footer ) → cursor.
+ *  - Carga src/scripts/main.ts (GSAP + Lenis + secciones).
+ *
+ * Slots: `head` (contenido extra en <head>) y el slot por defecto (contenido de <main>).
+ */
+import '../styles/global.css';
+import 'lenis/dist/lenis.css';
+
+// Precarga SOLO del woff2 del titular (Bricolage Grotesque variable, latin).
+// Con ?url Vite devuelve la ruta con hash, la misma que usa el @font-face.
+import headlineFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site, seo, absoluteUrl, isPending } from '../config/site';
+
+interface Props {
+  /** Título de la página (sin marca). Se compone como "Título · Al Madina". */
+  title?: string;
+  /** Título completo, tal cual (ignora `title`). Por defecto en la home. */
+  fullTitle?: string;
+  description?: string;
+  /** Ruta para la canónica, p. ej. "/aviso-legal". Por defecto, la URL actual. */
+  path?: string;
+  /** Fuerza noindex,nofollow aunque legalCompleto sea true (p. ej. 404). Sin URL canónica. */
+  noindex?: boolean;
+  /** Página de inicio: anclas "#id" en la nav y JSON-LD. */
+  isHome?: boolean;
+  /** Clase extra para <body>. */
+  bodyClass?: string;
+}
+
+const {
+  title,
+  fullTitle,
+  description = seo.description,
+  path,
+  noindex = false,
+  isHome = false,
+  bodyClass,
+} = Astro.props;
+
+const pageTitle = fullTitle ?? (title ? `${title} · ${site.nombreComercial}` : seo.titleHome);
+
+// Canónica absoluta. Astro genera carpetas (/aviso-legal/index.html): la URL
+// canónica lleva barra final, igual que en sitemap-index.xml.
+const rawPath = path ?? Astro.url.pathname;
+const normalizedPath = rawPath === '/' ? '/' : `/${rawPath.replace(/^\/+|\/+$/g, '')}/`;
+const canonical = absoluteUrl(normalizedPath);
+const ogImage = absoluteUrl(seo.ogImage);
+
+const robots = !site.legalCompleto || noindex ? 'noindex, nofollow' : 'index, follow';
+
+// JSON-LD sin datos inventados: los campos pendientes se omiten.
+const known = (v: string) => (isPending(v) ? undefined : v);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  '@id': absoluteUrl('/#restaurante'),
+  name: site.nombreComercial,
+  alternateName: site.nombreArabe,
+  url: absoluteUrl('/'),
+  logo: absoluteUrl('/icon-512.png'),
+  image: ogImage,
+  description: seo.description,
+  servesCuisine: ['Marroquí', 'Comida rápida'],
+  priceRange: site.precioPersona,
+  telephone: `+34 ${site.telefono}`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.direccion,
+    postalCode: site.codigoPostal,
+    addressLocality: 'Salt',
+    addressRegion: 'Girona',
+    addressCountry: 'ES',
+  },
+  hasMap: site.mapsUrl,
+  sameAs: [site.instagram, site.tiktok],
+  legalName: known(site.nombreLegal),
+  taxID: known(site.nif),
+}
+---
+
+<!doctype html>
+<html lang="es" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/* Patrón sin-JS/sin-parpadeo: debe ir antes que cualquier CSS. */}
+    <script is:inline>
+      (function (h) {
+        h.classList.add('js');
+        if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          h.classList.add('motion');
+        }
+      })(document.documentElement);
+    </script>
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={robots} />
+
+    <link rel="preload" href={headlineFont} as="font" type="font/woff2" crossorigin />
+
+    <meta name="theme-color" content={seo.themeColor} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* Open Graph / Twitter (imagen absoluta: WhatsApp no acepta SVG ni rutas relativas) */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.nombreComercial} />
+    <meta property="og:locale" content={seo.locale} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={seo.ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={seo.ogImageAlt} />
+
+    {isHome && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+
+    <Nav isHome={isHome} />
+
+    <div class="page">
+      <main id="main" tabindex="-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    {/* Cursor personalizado (lo activa core/cursor.ts solo en escritorio). */}
+    <div class="cursor" aria-hidden="true" data-cursor-el>
+      <span class="cursor__dot"></span>
+      <span class="cursor__label" data-cursor-label></span>
+    </div>
+
+    <script>
+      import '../scripts/main.ts';
+    </script>
+  </body>
+</html>

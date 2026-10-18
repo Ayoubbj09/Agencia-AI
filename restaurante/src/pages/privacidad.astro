@@ -1,0 +1,100 @@
+---
+/**
+ * /privacidad (RGPD + LOPDGDD). BORRADOR pendiente de revisión.
+ */
+import Base from '../layouts/Base.astro';
+import '../styles/legal.css';
+import SiteValue from '../components/SiteValue.astro';
+import { site } from '../config/site';
+
+const sections = [
+  { id: 'responsable', title: 'Responsable del tratamiento' },
+  { id: 'datos', title: 'Qué datos tratamos' },
+  { id: 'finalidad', title: 'Para qué y con qué base legal' },
+  { id: 'conservacion', title: 'Cuánto tiempo los guardamos' },
+  { id: 'destinatarios', title: 'Destinatarios y proveedores' },
+  { id: 'derechos', title: 'Tus derechos' },
+  { id: 'cookies', title: 'Cookies' },
+];
+const n = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<Base title="Política de privacidad" path="/privacidad" description="Cómo trata Al Madina los datos de quien visita esta web o hace un pedido por teléfono.">
+  <article class="legal" aria-labelledby="legal-title">
+    <div class="container">
+      <header class="legal__head">
+        {!site.legalCompleto && (
+          <p class="legal__draft" role="note" data-reveal="fade">
+            <mark class="pending">Borrador pendiente de revisión</mark>
+            <span>Texto provisional: debe revisarlo la gestoría del restaurante antes de publicar la web.</span>
+          </p>
+        )}
+        <p class="eyebrow" data-reveal>Legal</p>
+        <h1 class="legal__title" id="legal-title" data-reveal>Política de privacidad</h1>
+        <p class="legal__meta" data-reveal>Última actualización: {site.legalActualizado}</p>
+      </header>
+
+      <div class="legal__layout">
+        <nav class="legal__toc" aria-labelledby="legal-toc-title">
+          <p class="legal__toc-title" id="legal-toc-title">Contenido</p>
+          <ol role="list">
+            {sections.map((s, i) => (
+              <li><a href={`#${s.id}`}><span class="legal__toc-num" aria-hidden="true">{n(i)}</span>{s.title}</a></li>
+            ))}
+          </ol>
+        </nav>
+
+        <div class="legal__body">
+          <p class="legal__lead">Esta política explica cómo tratamos los datos de quien visita esta web y de quien nos llama o escribe para hacer un pedido o una consulta.</p>
+
+          <section class="legal__section" id="responsable" aria-labelledby="responsable-h">
+            <h2 id="responsable-h"><span class="legal__num" aria-hidden="true">{n(0)}</span>{sections[0].title}</h2>
+            <p><SiteValue value={site.nombreLegal} /> (nombre comercial “{site.nombreComercial}”), NIF <SiteValue value={site.nif} />, domicilio <SiteValue value={site.domicilioTitular} />, teléfono <span class="nowrap">{site.telefono}</span>, correo <SiteValue value={site.correo} kind="email" />.</p>
+          </section>
+
+          <section class="legal__section" id="datos" aria-labelledby="datos-h">
+            <h2 id="datos-h"><span class="legal__num" aria-hidden="true">{n(1)}</span>{sections[1].title}</h2>
+            <ul>
+              <li>Los que nos das al hacer un pedido o una consulta: nombre, teléfono y, si lo pides a domicilio, la dirección de entrega.</li>
+              <li>Al visitar la web, el proveedor de alojamiento (Vercel) registra de forma temporal datos técnicos (dirección IP, navegador, fecha y hora) para servir la web y protegerla frente a abusos. <mark class="pending">[REVISAR CON GESTORÍA: plazo de conservación de esos registros]</mark></li>
+            </ul>
+          </section>
+
+          <section class="legal__section" id="finalidad" aria-labelledby="finalidad-h">
+            <h2 id="finalidad-h"><span class="legal__num" aria-hidden="true">{n(2)}</span>{sections[2].title}</h2>
+            <ul>
+              <li>Preparar y entregar tu pedido y responder a tus consultas → ejecución de lo que nos pides (art. 6.1.b RGPD).</li>
+              <li>Datos técnicos de navegación → interés legítimo en el funcionamiento y la seguridad de la web (art. 6.1.f RGPD).</li>
+              <li>No usaremos tus datos para enviarte publicidad sin tu consentimiento.</li>
+            </ul>
+            <p><mark class="pending">[REVISAR CON GESTORÍA]</mark></p>
+          </section>
+
+          <section class="legal__section" id="conservacion" aria-labelledby="conservacion-h">
+            <h2 id="conservacion-h"><span class="legal__num" aria-hidden="true">{n(3)}</span>{sections[3].title}</h2>
+            <p>El tiempo necesario para atender tu pedido o consulta y, después, durante los plazos legales aplicables (por ejemplo, fiscales). <mark class="pending">[REVISAR CON GESTORÍA]</mark></p>
+          </section>
+
+          <section class="legal__section" id="destinatarios" aria-labelledby="destinatarios-h">
+            <h2 id="destinatarios-h"><span class="legal__num" aria-hidden="true">{n(4)}</span>{sections[4].title}</h2>
+            <ul>
+              <li><strong>Vercel</strong> (alojamiento de esta web, EE. UU.). <mark class="pending">[REVISAR CON GESTORÍA: garantías de la transferencia internacional]</mark></li>
+              <li>Si el reparto se hace por una plataforma (Glovo, Just Eat u otra), esa plataforma trata tus datos según su propia política. <mark class="pending">[PENDIENTE: confirmar qué plataformas de reparto se usan]</mark></li>
+              <li>No cedemos datos a terceros salvo obligación legal.</li>
+            </ul>
+          </section>
+
+          <section class="legal__section" id="derechos" aria-labelledby="derechos-h">
+            <h2 id="derechos-h"><span class="legal__num" aria-hidden="true">{n(5)}</span>{sections[5].title}</h2>
+            <p>Puedes pedir acceso, rectificación, supresión, oposición, limitación y portabilidad de tus datos escribiendo a <SiteValue value={site.correo} kind="email" /> o llamando al <span class="nowrap">{site.telefono}</span>. Si crees que no hemos respetado tus derechos, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).</p>
+          </section>
+
+          <section class="legal__section" id="cookies" aria-labelledby="cookies-h">
+            <h2 id="cookies-h"><span class="legal__num" aria-hidden="true">{n(6)}</span>{sections[6].title}</h2>
+            <p>Esta web no instala cookies ni guarda información en tu navegador, y no usa analítica, publicidad ni rastreadores. Las fuentes y los archivos se sirven desde el propio dominio. Los enlaces a Google Maps, Instagram y TikTok solo te llevan a esas webs si haces clic.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
