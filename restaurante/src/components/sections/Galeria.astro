@@ -1,0 +1,133 @@
+---
+/**
+ * Galería (#galeria): fotos del propio restaurante (de sus redes, recortadas
+ * para quitar textos y marcas de cámara). Revelado por clip-path al entrar.
+ * Para añadir/cambiar fotos: src/assets/fotos/ y la lista de abajo.
+ */
+import { Picture } from 'astro:assets';
+import brasa from '../../assets/fotos/brasa.webp';
+import cazuela from '../../assets/fotos/cazuela.webp';
+import sopa from '../../assets/fotos/sopa.webp';
+import postre from '../../assets/fotos/postre.webp';
+import local from '../../assets/fotos/local.webp';
+
+const fotos = [
+  { img: brasa, alt: 'Carne, brochetas de pollo y kefta a la brasa sobre la parrilla, con llamas.', cap: 'A la brasa', cls: 'g-brasa', w: [480, 854] },
+  { img: cazuela, alt: 'Cazuela de marisco con gambas y mejillones en salsa de tomate, con limón.', cap: 'Cazuela de marisco', cls: 'g-cazuela', w: [480, 800] },
+  { img: sopa, alt: 'Sopa de marisco en un cuenco blanco con una gamba y un trozo de limón.', cap: 'Sopa de marisco', cls: 'g-sopa', w: [400, 528] },
+  { img: postre, alt: 'Postre de leche en copa de cristal con sirope rojo.', cap: 'Postre de la casa', cls: 'g-postre', w: [400, 540] },
+  { img: local, alt: 'Interior del restaurante con sofás, lámparas colgantes y luz azul en el techo.', cap: 'Nuestro local', cls: 'g-local', w: [480, 800] },
+];
+---
+
+<section id="galeria" class="galeria section" aria-labelledby="galeria-title">
+  <div class="container">
+    <div class="galeria__head">
+      <p class="eyebrow" data-reveal>De nuestra cocina</p>
+      <h2 id="galeria-title" class="galeria__title" data-reveal="split">
+        Del fuego <em>a tu mesa</em>.
+      </h2>
+    </div>
+
+    <ul class="galeria__grid" role="list">
+      {
+        fotos.map((f) => (
+          <li class:list={['galeria__item', f.cls]}>
+            <figure>
+              <div class="galeria__frame" data-reveal="clip" data-cursor="Ver">
+                <Picture
+                  src={f.img}
+                  alt={f.alt}
+                  formats={['avif', 'webp']}
+                  fallbackFormat="webp"
+                  widths={f.w}
+                  sizes="(min-width: 1024px) 40vw, 90vw"
+                  loading="lazy"
+                  decoding="async"
+                  class="galeria__img"
+                />
+              </div>
+              <figcaption class="galeria__cap" data-reveal>{f.cap}</figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .galeria__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+  .galeria__title {
+    font-size: clamp(2.5rem, 1rem + 5.6vw, 6.5rem);
+    font-weight: var(--fw-bold);
+    line-height: 0.95;
+  }
+  .galeria__title :global(em) {
+    color: var(--accent);
+  }
+  .galeria__grid {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 768px) {
+    .galeria__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: minmax(0, auto);
+      align-items: start;
+    }
+    .g-brasa { grid-column: 1 / span 5; grid-row: span 2; }
+    .g-cazuela { grid-column: 6 / span 7; }
+    .g-sopa { grid-column: 6 / span 3; }
+    .g-postre { grid-column: 9 / span 4; }
+    .g-local { grid-column: 3 / span 8; }
+  }
+  .galeria__frame {
+    overflow: clip;
+    border-radius: var(--radius-lg);
+    background: var(--bg-elev);
+  }
+  .g-brasa .galeria__frame {
+    aspect-ratio: 3 / 4.6;
+    border-radius: 999px 999px var(--radius-lg) var(--radius-lg);
+  }
+  .g-cazuela .galeria__frame,
+  .g-local .galeria__frame {
+    aspect-ratio: 16 / 8;
+  }
+  .g-sopa .galeria__frame,
+  .g-postre .galeria__frame {
+    aspect-ratio: 1 / 1;
+  }
+  .galeria__frame :global(picture),
+  .galeria__frame :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .galeria__frame :global(img) {
+    transition: scale 0.9s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .galeria__item:hover .galeria__frame :global(img) {
+      scale: 1.04;
+    }
+  }
+  .galeria__cap {
+    margin-block-start: var(--space-xs);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  .galeria__cap::before {
+    content: '✦ ';
+    color: var(--accent);
+  }
+</style>

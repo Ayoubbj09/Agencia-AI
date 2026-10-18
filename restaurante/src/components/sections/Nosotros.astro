@@ -2,9 +2,10 @@
 /**
  * Nosotros (#nosotros). Texto BORRADOR para que lo apruebe el restaurante.
  * Los tres rasgos salen de lo que repiten sus reseñas de Google.
- * Para poner una foto del local, sustituye el arco decorativo por <Picture />.
+ * Foto del arco: batidos con el letrero de neón del local (de sus redes).
  */
-import Zellige from '../Zellige.astro';
+import { Picture } from 'astro:assets';
+import batidos from '../../assets/fotos/batidos.webp';
 const rasgos = [
   { t: 'Trato cercano', d: '“Nos atendieron con mucha amabilidad y respeto.”' },
   { t: 'Comida que gusta', d: '“La comida estaba deliciosa.”' },
@@ -14,10 +15,18 @@ const rasgos = [
 
 <section id="nosotros" class="nosotros section" aria-labelledby="nosotros-title">
   <div class="nosotros__grid container">
-    <div class="nosotros__arch" data-reveal="clip" aria-hidden="true">
-      <div class="nosotros__arch-inner">
-        <Zellige />
-      </div>
+    <div class="nosotros__arch" data-reveal="clip">
+      <Picture
+        src={batidos}
+        alt="Dos batidos de fresa en la mesa; al fondo, el letrero de neón de Al Madina sobre una pared de plantas."
+        formats={['avif', 'webp']}
+        fallbackFormat="webp"
+        widths={[400, 540]}
+        sizes="(min-width: 1024px) 30rem, 90vw"
+        loading="lazy"
+        decoding="async"
+        class="nosotros__img"
+      />
     </div>
 
     <div class="nosotros__text">
@@ -64,15 +73,15 @@ const rasgos = [
     aspect-ratio: 3 / 4;
     max-inline-size: 30rem;
     border-radius: 999px 999px var(--radius-md) var(--radius-md);
-    background: radial-gradient(120% 80% at 50% 0%, var(--bg-elev-2), var(--bg-elev));
-    border: 1px solid var(--line-strong);
+    background: var(--bg-elev);
     overflow: clip;
-    display: grid;
-    place-items: center;
   }
-  .nosotros__arch-inner {
-    inline-size: 130%;
-    opacity: 0.9;
+  .nosotros__arch :global(picture),
+  .nosotros__arch :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
   }
   .nosotros__title {
     margin-block-start: var(--space-s);

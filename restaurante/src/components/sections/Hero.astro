@@ -8,6 +8,8 @@ import { site } from '../../config/site';
 import CallButton from '../CallButton.astro';
 import Zellige from '../Zellige.astro';
 import Icon from '../Icon.astro';
+import { Picture } from 'astro:assets';
+import brasa from '../../assets/fotos/brasa.webp';
 ---
 
 <section id="inicio" class="hero" aria-labelledby="inicio-title">
@@ -15,6 +17,19 @@ import Icon from '../Icon.astro';
     <div class="hero__glow"></div>
     <div class="hero__rosette" data-hero-rosette>
       <Zellige />
+    </div>
+    <div class="hero__photo" data-hero-photo>
+      <Picture
+        src={brasa}
+        alt=""
+        formats={['avif', 'webp']}
+        fallbackFormat="webp"
+        widths={[400, 700, 854]}
+        sizes="(min-width: 1024px) 24rem, 1px"
+        loading="eager"
+        decoding="async"
+        fetchpriority="low"
+      />
     </div>
     <p class="hero__arabic" data-hero-arabic lang="ar" dir="rtl">{site.nombreArabe}</p>
   </div>
@@ -82,6 +97,32 @@ import Icon from '../Icon.astro';
     inset-inline-end: -14vw;
     translate: 0 -50%;
     opacity: 0.95;
+  }
+  /* Foto en arco (solo escritorio/tablet ancha), delante del rosetón. */
+  .hero__photo {
+    position: absolute;
+    inline-size: clamp(15rem, 8rem + 14vw, 24rem);
+    aspect-ratio: 3 / 4.2;
+    inset-block-start: 50%;
+    inset-inline-end: clamp(3rem, 1rem + 9vw, 12rem);
+    translate: 0 -46%;
+    rotate: 4deg;
+    border-radius: 999px 999px var(--radius-lg) var(--radius-lg);
+    overflow: clip;
+    border: 6px solid var(--bg);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+  .hero__photo :global(picture),
+  .hero__photo :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  @media (max-width: 1023px) {
+    .hero__photo {
+      display: none;
+    }
   }
   .hero__arabic {
     position: absolute;

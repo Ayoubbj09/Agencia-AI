@@ -1,9 +1,7 @@
 /**
- * CARTA DE EJEMPLO — pendiente de la carta real de Al Madina.
- *
- * Para poner la carta de verdad: cambia los nombres, descripciones y precios
- * de abajo (precio entre comillas, p. ej. '6,50 €'). Si un plato no tiene
- * precio todavía, deja precio: ''.
+ * CARTA DE EJEMPLO — basada en los platos que se ven en las redes de Al Madina.
+ * Pendiente de la carta real: cambia nombres, descripciones y precios (precio
+ * entre comillas, p. ej. '6,50 €'; si aún no hay precio, deja precio: '').
  * Mientras `cartaDeEjemplo` sea true, la web muestra el aviso "Carta de ejemplo".
  */
 export const cartaDeEjemplo = true;
@@ -21,39 +19,39 @@ export interface Categoria {
 
 export const carta: Categoria[] = [
   {
-    id: 'tacos',
-    nombre: 'Tacos',
+    id: 'brasa',
+    nombre: 'A la brasa',
     platos: [
-      { nombre: 'Taco de pollo', descripcion: 'Pollo marinado, patatas, queso fundido y salsa de la casa.', precio: '' },
-      { nombre: 'Taco de kefta', descripcion: 'Carne picada especiada al estilo marroquí, patatas y salsa.', precio: '' },
-      { nombre: 'Taco mixto', descripcion: 'Pollo y kefta, patatas, queso y salsa a elegir.', precio: '' },
+      { nombre: 'Brochetas de pollo', descripcion: 'Pollo marinado con especias, hecho a la parrilla.', precio: '' },
+      { nombre: 'Brochetas de kefta', descripcion: 'Carne picada especiada al estilo marroquí.', precio: '' },
+      { nombre: 'Chuletas de cordero', descripcion: 'A la brasa, en su punto.', precio: '' },
+      { nombre: 'Parrillada para compartir', descripcion: 'Surtido de carnes y brochetas a la brasa.', precio: '' },
     ],
   },
   {
-    id: 'durum',
-    nombre: 'Durum y bocadillos',
+    id: 'mar',
+    nombre: 'Del mar',
     platos: [
-      { nombre: 'Durum de pollo', descripcion: 'Pan fino enrollado con pollo, verduras y salsa.', precio: '' },
-      { nombre: 'Bocadillo de kefta', descripcion: 'Pan crujiente, kefta a la plancha, cebolla y especias.', precio: '' },
-      { nombre: 'Bocadillo de pollo', descripcion: 'Pollo a la plancha, ensalada y salsa de la casa.', precio: '' },
+      { nombre: 'Sopa de marisco', descripcion: 'Caldo de marisco con gambas y un toque de limón.', precio: '' },
+      { nombre: 'Cazuela de marisco', descripcion: 'Gambas y mejillones en salsa de tomate, con limón y perejil.', precio: '' },
     ],
   },
   {
-    id: 'platos',
-    nombre: 'Platos marroquíes',
+    id: 'fastfood',
+    nombre: 'Fast food',
     platos: [
-      { nombre: 'Tajín de pollo', descripcion: 'Pollo guisado lentamente con especias, limón y aceitunas.', precio: '' },
-      { nombre: 'Cuscús', descripcion: 'Sémola con verduras y carne, receta tradicional.', precio: '' },
-      { nombre: 'Harira', descripcion: 'Sopa marroquí de tomate, legumbres y especias.', precio: '' },
+      { nombre: 'Tacos', descripcion: 'Con la carne que prefieras, patatas, queso y salsa.', precio: '' },
+      { nombre: 'Patatas con salsa', descripcion: 'Patatas fritas con salsa de la casa.', precio: '' },
+      { nombre: 'Hamburguesa', descripcion: 'Pan tierno, carne a la plancha y salsa.', precio: '' },
     ],
   },
   {
-    id: 'bebidas',
-    nombre: 'Bebidas y dulces',
+    id: 'batidos',
+    nombre: 'Batidos y postres',
     platos: [
-      { nombre: 'Té a la menta', descripcion: 'Té verde con hierbabuena fresca, servido a la marroquí.', precio: '' },
-      { nombre: 'Batido natural', descripcion: 'Preparado al momento con fruta.', precio: '' },
-      { nombre: 'Dulces marroquíes', descripcion: 'Selección de pastas tradicionales con miel y almendra.', precio: '' },
+      { nombre: 'Batido de fresa', descripcion: 'Batido cremoso de fresa.', precio: '' },
+      { nombre: 'Postre de la casa', descripcion: 'Postre de leche con sirope de fresa. Te hará recordar tu infancia.', precio: '' },
+      { nombre: 'Té a la menta', descripcion: 'Té verde con hierbabuena, servido a la marroquí.', precio: '' },
     ],
   },
 ];

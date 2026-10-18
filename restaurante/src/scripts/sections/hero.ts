@@ -11,6 +11,7 @@ export function init(ctx: SectionContext): void {
   const rosette = q1('[data-hero-rosette]');
   const spin = rosette?.querySelector<SVGGElement>('[data-zellige-spin]');
   const arabic = q1('[data-hero-arabic]');
+  const photo = q1('[data-hero-photo]');
 
   mm.add(
     conditions,
@@ -42,6 +43,15 @@ export function init(ctx: SectionContext): void {
       }
       if (arabic) {
         gsap.from(arabic, { yPercent: 30, opacity: 0, duration: 1.6, ease: 'power3.out', delay: 0.4 });
+      }
+
+      if (photo && mode === 'desktop') {
+        gsap.from(photo, { yPercent: 18, opacity: 0, duration: 1.4, ease: 'expo.out', delay: 0.35 });
+        gsap.to(photo, {
+          yPercent: -14,
+          ease: 'none',
+          scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.8 },
+        });
       }
 
       if (mode === 'desktop' && rosette) {
