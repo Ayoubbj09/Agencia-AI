@@ -1,7 +1,9 @@
 ---
 /**
- * Logotipo tipográfico "Ahlan IA".
+ * Logotipo "Ahlan IA": símbolo del arco + nombre.
  *
+ *  Arco   →  arco conopial (puerta de bienvenida: "ahlan" = bienvenido) con un
+ *            punto naranja dentro (la persona a la que se recibe). SVG en línea.
  *  Ahlan   →  Inter Tight, peso 600, tracking cerrado.
  *  ●       →  el "testigo": un punto naranja que toca la "n" final. Al pasar el
  *             ratón por el enlace que lo contiene, viaja hasta "IA" (el relevo).
@@ -25,7 +27,16 @@ const { size, decorative = false, class: className } = Astro.props;
   style={size ? `--logo-size: ${size}` : undefined}
   {...decorative ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': 'Ahlan IA' }}
 >
-  <span class="logo__word" aria-hidden="true">Ahlan</span><span
+  <svg class="logo__mark" viewBox="0 0 100 116" aria-hidden="true" focusable="false">
+    <path
+      d="M20 104 V53 C20 33 28 25 37 20.5 C43 17.5 47 15.5 50 12 C53 15.5 57 17.5 63 20.5 C72 25 80 33 80 53 V104"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="10.5"
+      stroke-linecap="round"
+      stroke-miterlimit="12"></path>
+    <circle cx="50" cy="72" r="8" fill="var(--accent)"></circle>
+  </svg><span class="logo__word" aria-hidden="true">Ahlan</span><span
     class="logo__baton"
     aria-hidden="true"></span><span class="logo__ia" aria-hidden="true">IA</span>
 </span>
@@ -40,6 +51,14 @@ const { size, decorative = false, class: className } = Astro.props;
     color: var(--text);
     white-space: nowrap;
     user-select: none;
+  }
+  .logo__mark {
+    inline-size: auto;
+    block-size: 1.32em;
+    margin-inline-end: 0.34em;
+    align-self: center;
+    translate: 0 -0.04em;
+    overflow: visible;
   }
   .logo__word {
     font-family: var(--font-sans);

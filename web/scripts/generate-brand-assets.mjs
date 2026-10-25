@@ -26,16 +26,22 @@ const TEXT = '#F2EEE8';
 const ACCENT = '#FF6B2C';
 
 /**
- * Marca "R + testigo": una R geométrica de trazo y un punto naranja que toca el
- * extremo de su pierna — el testigo que se pasa (mismo detalle que el logotipo).
- * Dibujada con trazos (no depende de ninguna fuente instalada).
+ * Símbolo de Ahlan IA: arco conopial (puerta de bienvenida) con un punto
+ * naranja dentro. Dibujado con trazos (no depende de ninguna fuente).
+ * El arco vive en una caja 100×116 y aquí se escala al lienzo de 64×64.
  */
+export const ARCH_PATH =
+  'M20 104 V53 C20 33 28 25 37 20.5 C43 17.5 47 15.5 50 12 C53 15.5 57 17.5 63 20.5 C72 25 80 33 80 53 V104';
+
 function markSvg({ rounded = true, padding = 0 } = {}) {
   const s = 64 + padding * 2;
+  // Escala 0.42 → el arco mide 42×49 px dentro de 64; trazo más grueso para que aguante a 16 px.
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-padding} ${-padding} ${s} ${s}" width="${s}" height="${s}">
   <rect x="${-padding}" y="${-padding}" width="${s}" height="${s}" ${rounded ? 'rx="14"' : ''} fill="${BG}"/>
-  <path d="M14 49L28.5 15L43 49M19.6 38h17.8" fill="none" stroke="${TEXT}" stroke-width="7"/>
-  <circle cx="50.4" cy="45.6" r="4.6" fill="${ACCENT}"/>
+  <g transform="translate(11 5.5) scale(0.42)">
+    <path d="${ARCH_PATH}" fill="none" stroke="${TEXT}" stroke-width="13" stroke-linecap="round" stroke-miterlimit="12"/>
+    <circle cx="50" cy="72" r="10" fill="${ACCENT}"/>
+  </g>
 </svg>
 `;
 }

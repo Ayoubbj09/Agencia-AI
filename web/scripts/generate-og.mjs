@@ -431,7 +431,13 @@ async function compose(sharp) {
   // (Instrument Serif cursiva), como src/components/Logo.astro.
   const logoSize = 196;
   const logoBaseline = H - PAD - 6;
-  const marca = `<text x="${PAD - 6}" y="${logoBaseline}" font-family="${FAMILY_SANS}" font-weight="600" font-size="${logoSize}" letter-spacing="${(-0.045 * logoSize).toFixed(2)}" fill="${C.text}">Ahlan</text>`;
+  // Símbolo del arco a la izquierda del nombre (caja 100×116 → alto ≈ 1.05 × logoSize).
+  const archScale = (logoSize * 1.02) / 116;
+  const archW = 100 * archScale;
+  const archY = logoBaseline - 116 * archScale + logoSize * 0.06;
+  const arch = `<g transform="translate(${PAD - 10} ${archY.toFixed(1)}) scale(${archScale.toFixed(3)})"><path d="M20 104 V53 C20 33 28 25 37 20.5 C43 17.5 47 15.5 50 12 C53 15.5 57 17.5 63 20.5 C72 25 80 33 80 53 V104" fill="none" stroke="${C.text}" stroke-width="10.5" stroke-linecap="round" stroke-miterlimit="12"/><circle cx="50" cy="72" r="8" fill="${C.accent}"/></g>`;
+  const textX = PAD - 10 + archW + logoSize * 0.12;
+  const marca = `<text x="${textX.toFixed(1)}" y="${logoBaseline}" font-family="${FAMILY_SANS}" font-weight="600" font-size="${logoSize}" letter-spacing="${(-0.045 * logoSize).toFixed(2)}" fill="${C.text}">Ahlan</text>`;
   const marcaBox = await inkBox(sharp, marca);
   const dotR = (0.2 * logoSize) / 2;
   const dotCx = marcaBox.right + 0.012 * logoSize + dotR;
@@ -469,6 +475,7 @@ async function compose(sharp) {
 
   <line x1="${PAD}" y1="${logoBaseline - logoSize * 0.98}" x2="${W - PAD}" y2="${logoBaseline - logoSize * 0.98}" stroke="${C.line}" stroke-width="1"/>
 
+  ${arch}
   ${marca}
   <circle cx="${dotCx.toFixed(1)}" cy="${dotCy.toFixed(1)}" r="${dotR.toFixed(1)}" fill="${C.accent}"/>
   ${ia}
